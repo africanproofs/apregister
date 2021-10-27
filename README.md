@@ -1,7 +1,8 @@
 African Proofs proposes an on-chain mechanism to enable Flare and Songbird participants to self manage data about themselves and their offerings. The mechanism involves a smart contract deployed on-chain, allowing participants to publish a pointer to a self hosted and standardised file containing information on the participant. This is intended for use by price providers and state connector validators.
-**This information would also be useful for devs implementing on the Flare and Songbird chains.**
 
-### Flare Participant Register Contract
+**This information would also be useful for devs implementing on the Flare and Songbird chains as they make decision on which endpoints would be best performers for their Dapps.**
+
+## Flare Participant Register Contract
 The contract is intended to facilitate a decentralised method to, in a permissionless manner; 1.) Notify other chain participants of the existence of chain infrastructure offerings, 2.) Allow for an exchange of meta information amongst and about chain providers and validators.
 
 **How it works.**
@@ -24,12 +25,12 @@ A call to *getParticipant* requires a registered address as a parameter. The cal
 The contract has no admin facility.
 
 
-### Standardised Flare Participant File.
-**A Standardized JSON file Flare Validators and Providers**
+## Standardised Flare Participant File.
+**A Standardized JSON file for Flare Validators and Providers**
 
 This is a proposed standard for Block Producer candidates to publish as the URL field of the `regproducer` action on the `eosio.system` contract.
 
-# THE PARTICIPANT DECIDES WHAT THEY PUBLISH. NO AUTHORITY.
+### THE PARTICIPANT DECIDES WHAT THEY PUBLISH. NO AUTHORITY.
 
 - name: Name of validator or price provider
 - chains: [Array]
