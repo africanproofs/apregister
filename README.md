@@ -1,6 +1,6 @@
 African Proofs proposes an on-chain mechanism to enable Flare and Songbird participants to self manage data about themselves and their offerings. The mechanism involves a smart contract deployed on-chain, allowing participants to publish a pointer to a self hosted and standardised file containing information on the participant. This is intended for use by price providers and state connector validators.
 
-**This information would also be useful for devs implementing on the Flare and Songbird chains as they make decision on which endpoints would be best performers for their Dapps.**
+**This information would also be useful for devs implementing on the Flare and Songbird chains, as they make decisions about which endpoints would be best performers for their Dapps.**
 
 ## Flare Participant Register Contract
 The contract is intended to facilitate a decentralised method to, in a permissionless manner; 1.) Notify other chain participants of the existence of chain infrastructure offerings, 2.) Allow for an exchange of meta information amongst and about chain providers and validators.
@@ -68,13 +68,17 @@ The contract has no admin facility.
     - ws_endpoint: Chain WS endpoint
 
 ## Validator and Price Provider Instructions 
-Copy the [template](https://gitlab.com/proofs.africa/flare-participant-register/assets/participant.json.template) provided on this repo. Name the file participant.json
+Copy the [template](https://gitlab.com/proofs.africa/flare-participant-register/assets/participant.template.json) provided on this repo. Name the file participant.json
 
 Update the template with information specific to your organisation. Ensure that you provide as much and as accurate data as possible.
 
 Upload the file to a publicly accessable endpoint. Could be your website, online git service, dropbox etc.
 
 Ensure that the URL is downloadable by tools such as curl, wget etc.
+
+## Deployment
+
+A TEST contract is deployed on Songbird at the following address 0x... There will be a feedback period until <Enter Date>.
 
 ## Meta Info and Links
 The current version number of the specification file is **v0.1.0** and it is compliant with the JSON schema [Draft 2019-09](https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8)
