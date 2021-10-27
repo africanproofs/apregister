@@ -78,7 +78,7 @@ Ensure that the URL is downloadable by tools such as curl, wget etc.
 
 ## Deployment
 
-A TEST contract is deployed on Songbird at the following address 0x... There will be a feedback period until <Enter Date>.
+A TEST contract is deployed on Songbird at the following address {address}. There will be a feedback period until {date}.
 
 ## Meta Info and Links
 The current version number of the specification file is **v0.1.0** and it is compliant with the JSON schema [Draft 2019-09](https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8)
