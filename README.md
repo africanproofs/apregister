@@ -7,7 +7,7 @@ The contract is intended to facilitate a decentralised method to, in a permissio
 
 #How it works.
 
-**From the validator/provider side**
+**From the validator/provider side: **
 The contract exposes two state altering functions i.e. *register* and *unregister*. 
 A call to the *register* function requires two parameters, namely, 1) The name of the provider; 2) An http/https url pointer to information about the sender. The new record is given a status of 1, denoting that the record is active. 
 
@@ -17,7 +17,7 @@ In order to update the record, the sender is required to send another *register*
 
 The *register* and *unregister* functions MUST be signed by the participant.
 
-**From the data consumer side**	
+**From the data consumer side: **	
 Once registered, other stakeholders such as dapp developers can use the information as a reference and a starting point in sourcing data about the deployed chain infrastructure. This can be done using the contracts two data acquisition functions i.e. *getAllParticipants* and *getParticipant*.
 
 A call to *getAllParticipants* takes no parameters and returns a list of ALL registered addresses, irrespective of the status.
