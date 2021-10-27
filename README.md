@@ -26,9 +26,7 @@ The contract has no admin facility.
 
 
 ## Standardised Flare Participant File.
-**A Standardized JSON file for Flare Validators and Providers**
-
-This is a proposed standard for Block Producer candidates to publish as the URL field of the `regproducer` action on the `eosio.system` contract.
+**A Standardized JSON file for Flare Validators and Providers to publish as their info URL field when calling the register action on the Flare Participant Register Contract.**
 
 ### THE PARTICIPANT DECIDES WHAT THEY PUBLISH. NO AUTHORITY.
 
