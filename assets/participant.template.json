@@ -3,11 +3,12 @@
     "chains": [
         {
             "chain_id": 0,
-            "org_address": ""
+            "address": ""
         }
     ],
     "organisation": {
       "branding":{
+        "logo_128":"",
         "logo_256":"",
         "logo_1024":"",
         "logo_svg":""
