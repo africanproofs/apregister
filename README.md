@@ -1,4 +1,4 @@
-African Proofs proposes an on-chain mechanism to enable Flare and Songbird participants to self manage data about themselves and their offerings. The mechanism involves a smart contract deployed on-chain, allowing participants to publish a pointer to a self hosted and standardised file containing information on the participant. This is intended for use by price providers and state connector validators.
+African Proofs proposes an on-chain mechanism to enable Flare and Songbird participants to self-manage data about their offerings. The mechanism involves a smart contract deployed on-chain, allowing participants to publish a pointer to a self hosted and standardised file containing information on the participant. This is intended for use by price providers and state connector validators.
 
 **This information would also be useful for devs implementing on the Flare and Songbird chains, as they make decisions about which endpoints would be best performers for their Dapps.**
 
