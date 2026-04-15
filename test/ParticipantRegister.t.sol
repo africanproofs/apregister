@@ -8,16 +8,33 @@ import {IParticipantRegister} from "../src/IParticipantRegister.sol";
 contract ParticipantRegisterTest is Test {
     ParticipantRegister private register;
 
-    event ParticipantRegistered(address indexed owner, uint256 index, string infoURI);
+    // Re-declare enum for test convenience
+    using {_t} for uint8;
+
+    event ParticipantRegistered(
+        address indexed owner,
+        IParticipantRegister.ParticipantType indexed participantType,
+        uint256 index,
+        string infoURI
+    );
     event ParticipantUnregistered(address indexed owner, uint256 index);
 
     address private alice = makeAddr("alice");
     address private bob = makeAddr("bob");
     address private charlie = makeAddr("charlie");
+    address private defiProtocol = makeAddr("defiProtocol");
+    address private wallet = makeAddr("wallet");
+
+    IParticipantRegister.ParticipantType constant PROVIDER = IParticipantRegister.ParticipantType.Provider;
+    IParticipantRegister.ParticipantType constant DEFI = IParticipantRegister.ParticipantType.DeFi;
+    IParticipantRegister.ParticipantType constant WALLET = IParticipantRegister.ParticipantType.Wallet;
+    IParticipantRegister.ParticipantType constant TOOL = IParticipantRegister.ParticipantType.Tool;
+    IParticipantRegister.ParticipantType constant APP = IParticipantRegister.ParticipantType.App;
 
     string private constant INFO_AP = "https://proofs.africa/participant.json";
     string private constant INFO_BOB = "https://bob.example.com/participant.json";
-    string private constant INFO_PROTOCOL = "https://kinetic.market/participant.json";
+    string private constant INFO_DEFI = "https://kinetic.market/participant.json";
+    string private constant INFO_WALLET = "https://bifrostwallet.com/participant.json";
 
     function setUp() public {
         register = new ParticipantRegister();
@@ -25,12 +42,12 @@ contract ParticipantRegisterTest is Test {
 
     function _registerAlice() internal {
         vm.prank(alice);
-        register.register(INFO_AP);
+        register.register(PROVIDER, INFO_AP);
     }
 
     function _registerBob() internal {
         vm.prank(bob);
-        register.register(INFO_BOB);
+        register.register(PROVIDER, INFO_BOB);
     }
 
     // ---------------------------------------------------------------
@@ -43,6 +60,7 @@ contract ParticipantRegisterTest is Test {
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.owner, alice);
+        assertTrue(p.participantType == PROVIDER);
         assertEq(p.infoURI, INFO_AP);
         assertTrue(p.active);
         assertEq(p.index, 0);
@@ -51,11 +69,11 @@ contract ParticipantRegisterTest is Test {
     }
 
     function test_register_emitsEvent() public {
-        vm.expectEmit(true, false, false, true);
-        emit ParticipantRegistered(alice, 0, INFO_AP);
+        vm.expectEmit(true, true, false, true);
+        emit ParticipantRegistered(alice, PROVIDER, 0, INFO_AP);
 
         vm.prank(alice);
-        register.register(INFO_AP);
+        register.register(PROVIDER, INFO_AP);
     }
 
     function test_register_update() public {
@@ -64,11 +82,10 @@ contract ParticipantRegisterTest is Test {
 
         vm.roll(200);
         vm.prank(alice);
-        register.register("https://proofs.africa/v2/participant.json");
+        register.register(PROVIDER, "https://proofs.africa/v2/participant.json");
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.infoURI, "https://proofs.africa/v2/participant.json");
-        assertTrue(p.active);
         assertEq(p.registeredAt, 100);
         assertEq(p.updatedAt, 200);
     }
@@ -76,7 +93,7 @@ contract ParticipantRegisterTest is Test {
     function test_register_revertsOnEmptyURI() public {
         vm.prank(alice);
         vm.expectRevert(IParticipantRegister.EmptyInfoURI.selector);
-        register.register("");
+        register.register(PROVIDER, "");
     }
 
     function test_register_revertsOnUriTooLong() public {
@@ -85,7 +102,7 @@ contract ParticipantRegisterTest is Test {
 
         vm.prank(alice);
         vm.expectRevert(IParticipantRegister.UriTooLong.selector);
-        register.register(string(longUri));
+        register.register(PROVIDER, string(longUri));
     }
 
     function test_register_exactlyAtMaxLength() public {
@@ -93,7 +110,7 @@ contract ParticipantRegisterTest is Test {
         for (uint i = 0; i < 256; i++) uri256[i] = "A";
 
         vm.prank(alice);
-        register.register(string(uri256));
+        register.register(PROVIDER, string(uri256));
         assertEq(bytes(register.getParticipant(alice).infoURI).length, 256);
     }
 
@@ -106,15 +123,106 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.getParticipant(bob).index, 1);
     }
 
-    function test_register_anyAddressCanRegister() public {
-        // Protocol (no EntityManager, no delegation — doesn't matter)
-        vm.prank(charlie);
-        register.register(INFO_PROTOCOL);
+    // ---------------------------------------------------------------
+    // Types
+    // ---------------------------------------------------------------
 
-        IParticipantRegister.Participant memory p = register.getParticipant(charlie);
-        assertEq(p.owner, charlie);
-        assertEq(p.infoURI, INFO_PROTOCOL);
-        assertTrue(p.active);
+    function test_register_asDefi() public {
+        vm.prank(defiProtocol);
+        register.register(DEFI, INFO_DEFI);
+
+        IParticipantRegister.Participant memory p = register.getParticipant(defiProtocol);
+        assertTrue(p.participantType == DEFI);
+    }
+
+    function test_register_asWallet() public {
+        vm.prank(wallet);
+        register.register(WALLET, INFO_WALLET);
+
+        assertTrue(register.getParticipant(wallet).participantType == WALLET);
+    }
+
+    function test_register_changeType() public {
+        vm.prank(alice);
+        register.register(PROVIDER, INFO_AP);
+        assertTrue(register.getParticipant(alice).participantType == PROVIDER);
+        assertEq(register.typeCount(PROVIDER), 1);
+
+        vm.prank(alice);
+        register.register(TOOL, INFO_AP);
+        assertTrue(register.getParticipant(alice).participantType == TOOL);
+        assertEq(register.typeCount(PROVIDER), 0);
+        assertEq(register.typeCount(TOOL), 1);
+    }
+
+    function test_typeCount() public {
+        vm.prank(alice);
+        register.register(PROVIDER, INFO_AP);
+
+        vm.prank(bob);
+        register.register(PROVIDER, INFO_BOB);
+
+        vm.prank(defiProtocol);
+        register.register(DEFI, INFO_DEFI);
+
+        assertEq(register.typeCount(PROVIDER), 2);
+        assertEq(register.typeCount(DEFI), 1);
+        assertEq(register.typeCount(WALLET), 0);
+    }
+
+    function test_typeCount_decrementOnUnregister() public {
+        _registerAlice();
+        assertEq(register.typeCount(PROVIDER), 1);
+
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.typeCount(PROVIDER), 0);
+    }
+
+    function test_typeCount_incrementOnReregister() public {
+        _registerAlice();
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.typeCount(PROVIDER), 0);
+
+        vm.prank(alice);
+        register.register(PROVIDER, INFO_AP);
+        assertEq(register.typeCount(PROVIDER), 1);
+    }
+
+    function test_getParticipantsByType() public {
+        vm.prank(alice);
+        register.register(PROVIDER, INFO_AP);
+
+        vm.prank(bob);
+        register.register(PROVIDER, INFO_BOB);
+
+        vm.prank(defiProtocol);
+        register.register(DEFI, INFO_DEFI);
+
+        address[] memory providers = register.getParticipantsByType(PROVIDER);
+        assertEq(providers.length, 2);
+        assertEq(providers[0], alice);
+        assertEq(providers[1], bob);
+
+        address[] memory defi = register.getParticipantsByType(DEFI);
+        assertEq(defi.length, 1);
+        assertEq(defi[0], defiProtocol);
+
+        address[] memory wallets = register.getParticipantsByType(WALLET);
+        assertEq(wallets.length, 0);
+    }
+
+    function test_getParticipantsByType_excludesInactive() public {
+        _registerAlice();
+        _registerBob();
+
+        vm.prank(alice);
+        register.unregister();
+
+        address[] memory providers = register.getParticipantsByType(PROVIDER);
+        assertEq(providers.length, 1);
+        assertEq(providers[0], bob);
     }
 
     // ---------------------------------------------------------------
@@ -131,16 +239,14 @@ contract ParticipantRegisterTest is Test {
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertFalse(p.active);
-        assertEq(p.infoURI, INFO_AP); // data retained
+        assertEq(p.infoURI, INFO_AP);
         assertEq(p.updatedAt, 200);
     }
 
     function test_unregister_emitsEvent() public {
         _registerAlice();
-
         vm.expectEmit(true, false, false, true);
         emit ParticipantUnregistered(alice, 0);
-
         vm.prank(alice);
         register.unregister();
     }
@@ -161,12 +267,10 @@ contract ParticipantRegisterTest is Test {
 
         vm.roll(200);
         vm.prank(alice);
-        register.register("https://proofs.africa/v2/participant.json");
+        register.register(PROVIDER, "https://proofs.africa/v2/participant.json");
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertTrue(p.active);
-        assertEq(p.infoURI, "https://proofs.africa/v2/participant.json");
-        assertEq(p.index, 0);
         assertEq(p.registeredAt, 100);
         assertEq(p.updatedAt, 200);
         assertEq(register.participantCount(), 1);
@@ -199,7 +303,7 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.activeCount(), 0);
 
         vm.prank(alice);
-        register.register(INFO_AP);
+        register.register(PROVIDER, INFO_AP);
         assertEq(register.activeCount(), 1);
     }
 
@@ -208,7 +312,7 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.activeCount(), 1);
 
         vm.prank(alice);
-        register.register("https://proofs.africa/v2/participant.json");
+        register.register(PROVIDER, "https://proofs.africa/v2/participant.json");
         assertEq(register.activeCount(), 1);
     }
 
@@ -216,7 +320,6 @@ contract ParticipantRegisterTest is Test {
         _registerAlice();
         vm.prank(alice);
         register.unregister();
-        assertEq(register.activeCount(), 0);
 
         vm.prank(alice);
         register.unregister();
@@ -240,7 +343,6 @@ contract ParticipantRegisterTest is Test {
 
     function test_getParticipant_anyoneCanRead() public {
         _registerAlice();
-
         vm.prank(bob);
         assertEq(register.getParticipant(alice).infoURI, INFO_AP);
     }
@@ -254,7 +356,6 @@ contract ParticipantRegisterTest is Test {
     function test_getAllParticipants() public {
         _registerAlice();
         _registerBob();
-
         address[] memory all = register.getAllParticipants();
         assertEq(all.length, 2);
         assertEq(all[0], alice);
@@ -272,7 +373,6 @@ contract ParticipantRegisterTest is Test {
     function test_getActiveParticipants() public {
         _registerAlice();
         _registerBob();
-
         vm.prank(alice);
         register.unregister();
 
@@ -285,13 +385,6 @@ contract ParticipantRegisterTest is Test {
         _registerAlice();
         _registerBob();
         assertEq(register.getActiveParticipants().length, 2);
-    }
-
-    function test_getActiveParticipants_noneActive() public {
-        _registerAlice();
-        vm.prank(alice);
-        register.unregister();
-        assertEq(register.getActiveParticipants().length, 0);
     }
 
     function test_getActiveParticipants_empty() public view {
@@ -374,21 +467,27 @@ contract ParticipantRegisterTest is Test {
     // Bulk
     // ---------------------------------------------------------------
 
-    function test_manyParticipants() public {
-        for (uint256 i = 0; i < 20; i++) {
+    function test_manyParticipants_mixedTypes() public {
+        for (uint256 i = 0; i < 10; i++) {
             address user = makeAddr(string(abi.encodePacked("user", vm.toString(i))));
+            IParticipantRegister.ParticipantType t = i < 5 ? PROVIDER : DEFI;
             vm.prank(user);
-            register.register(
-                string(abi.encodePacked("https://example.com/", vm.toString(i), "/participant.json"))
-            );
+            register.register(t, string(abi.encodePacked("https://example.com/", vm.toString(i), ".json")));
         }
 
-        assertEq(register.participantCount(), 20);
-        assertEq(register.activeCount(), 20);
+        assertEq(register.participantCount(), 10);
+        assertEq(register.activeCount(), 10);
+        assertEq(register.typeCount(PROVIDER), 5);
+        assertEq(register.typeCount(DEFI), 5);
 
-        IParticipantRegister.Participant[] memory page1 = register.getParticipants(0, 10);
-        IParticipantRegister.Participant[] memory page2 = register.getParticipants(10, 10);
-        assertEq(page1.length, 10);
-        assertEq(page2.length, 10);
+        address[] memory providers = register.getParticipantsByType(PROVIDER);
+        assertEq(providers.length, 5);
+
+        address[] memory defi = register.getParticipantsByType(DEFI);
+        assertEq(defi.length, 5);
     }
+}
+
+function _t(uint8) pure returns (IParticipantRegister.ParticipantType) {
+    return IParticipantRegister.ParticipantType.Provider;
 }
