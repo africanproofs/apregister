@@ -4,55 +4,23 @@ pragma solidity 0.8.20;
 import "forge-std/Test.sol";
 import {ParticipantRegister} from "../src/ParticipantRegister.sol";
 import {IParticipantRegister} from "../src/IParticipantRegister.sol";
-import {IEntityManager} from "../src/IEntityManager.sol";
-
-/// @dev Minimal mock for EntityManager.
-contract MockEntityManager {
-    mapping(address => address) private _delegations;
-
-    function setDelegation(address voter, address delegation) external {
-        _delegations[voter] = delegation;
-    }
-
-    function getDelegationAddressOf(address _voter) external view returns (address) {
-        return _delegations[_voter];
-    }
-
-    function getDelegationAddressOfAt(address, uint256) external pure returns (address) { return address(0); }
-    function getNodeIdsOf(address) external pure returns (bytes20[] memory) { return new bytes20[](0); }
-    function getNodeIdsOfAt(address, uint256) external pure returns (bytes20[] memory) { return new bytes20[](0); }
-    function getPublicKeyOf(address) external pure returns (bytes32, bytes32) { return (bytes32(0), bytes32(0)); }
-    function getPublicKeyOfAt(address, uint256) external pure returns (bytes32, bytes32) { return (bytes32(0), bytes32(0)); }
-}
 
 contract ParticipantRegisterTest is Test {
     ParticipantRegister private register;
-    MockEntityManager private mockEntityManager;
 
-    event ParticipantRegistered(
-        address indexed owner,
-        address indexed delegation,
-        uint256 index,
-        string infoURI
-    );
+    event ParticipantRegistered(address indexed owner, uint256 index, string infoURI);
     event ParticipantUnregistered(address indexed owner, uint256 index);
 
-    address private alice = makeAddr("alice");           // provider with delegation
-    address private aliceDelegation = makeAddr("aliceDelegation");
-    address private bob = makeAddr("bob");               // provider with delegation
-    address private bobDelegation = makeAddr("bobDelegation");
-    address private protocol = makeAddr("protocol");     // protocol without delegation
-    address private attacker = makeAddr("attacker");
+    address private alice = makeAddr("alice");
+    address private bob = makeAddr("bob");
+    address private charlie = makeAddr("charlie");
 
     string private constant INFO_AP = "https://proofs.africa/participant.json";
     string private constant INFO_BOB = "https://bob.example.com/participant.json";
     string private constant INFO_PROTOCOL = "https://kinetic.market/participant.json";
 
     function setUp() public {
-        mockEntityManager = new MockEntityManager();
-        mockEntityManager.setDelegation(alice, aliceDelegation);
-        mockEntityManager.setDelegation(bob, bobDelegation);
-        register = new ParticipantRegister(IEntityManager(address(mockEntityManager)));
+        register = new ParticipantRegister();
     }
 
     function _registerAlice() internal {
@@ -75,7 +43,6 @@ contract ParticipantRegisterTest is Test {
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.owner, alice);
-        assertEq(p.delegation, aliceDelegation);
         assertEq(p.infoURI, INFO_AP);
         assertTrue(p.active);
         assertEq(p.index, 0);
@@ -84,8 +51,8 @@ contract ParticipantRegisterTest is Test {
     }
 
     function test_register_emitsEvent() public {
-        vm.expectEmit(true, true, false, true);
-        emit ParticipantRegistered(alice, aliceDelegation, 0, INFO_AP);
+        vm.expectEmit(true, false, false, true);
+        emit ParticipantRegistered(alice, 0, INFO_AP);
 
         vm.prank(alice);
         register.register(INFO_AP);
@@ -95,16 +62,12 @@ contract ParticipantRegisterTest is Test {
         vm.roll(100);
         _registerAlice();
 
-        address newDelegation = makeAddr("newDelegation");
-        mockEntityManager.setDelegation(alice, newDelegation);
-
         vm.roll(200);
         vm.prank(alice);
         register.register("https://proofs.africa/v2/participant.json");
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.infoURI, "https://proofs.africa/v2/participant.json");
-        assertEq(p.delegation, newDelegation);
         assertTrue(p.active);
         assertEq(p.registeredAt, 100);
         assertEq(p.updatedAt, 200);
@@ -131,9 +94,7 @@ contract ParticipantRegisterTest is Test {
 
         vm.prank(alice);
         register.register(string(uri256));
-
-        IParticipantRegister.Participant memory p = register.getParticipant(alice);
-        assertEq(bytes(p.infoURI).length, 256);
+        assertEq(bytes(register.getParticipant(alice).infoURI).length, 256);
     }
 
     function test_register_multipleParticipants() public {
@@ -145,117 +106,15 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.getParticipant(bob).index, 1);
     }
 
-    // ---------------------------------------------------------------
-    // Protocols (no EntityManager delegation)
-    // ---------------------------------------------------------------
-
-    function test_register_protocolWithoutDelegation() public {
-        vm.prank(protocol);
+    function test_register_anyAddressCanRegister() public {
+        // Protocol (no EntityManager, no delegation — doesn't matter)
+        vm.prank(charlie);
         register.register(INFO_PROTOCOL);
 
-        IParticipantRegister.Participant memory p = register.getParticipant(protocol);
-        assertEq(p.owner, protocol);
-        assertEq(p.delegation, address(0));
+        IParticipantRegister.Participant memory p = register.getParticipant(charlie);
+        assertEq(p.owner, charlie);
         assertEq(p.infoURI, INFO_PROTOCOL);
         assertTrue(p.active);
-    }
-
-    // ---------------------------------------------------------------
-    // EntityManager integration
-    // ---------------------------------------------------------------
-
-    function test_delegationReadFromEntityManager() public {
-        _registerAlice();
-        assertEq(register.getParticipant(alice).delegation, aliceDelegation);
-    }
-
-    function test_delegationHijackingImpossible() public {
-        _registerAlice();
-
-        vm.prank(attacker);
-        register.register("https://evil.com/participant.json");
-
-        // Alice's delegation lookup still returns Alice
-        IParticipantRegister.Participant memory p = register.getByDelegationAddress(aliceDelegation);
-        assertEq(p.owner, alice);
-
-        // Attacker has no delegation
-        assertEq(register.getParticipant(attacker).delegation, address(0));
-    }
-
-    function test_entityManagerAddress() public view {
-        assertEq(address(register.entityManager()), address(mockEntityManager));
-    }
-
-    // ---------------------------------------------------------------
-    // refreshDelegation
-    // ---------------------------------------------------------------
-
-    function test_refreshDelegation() public {
-        _registerAlice();
-
-        address newDelegation = makeAddr("newDelegation");
-        mockEntityManager.setDelegation(alice, newDelegation);
-
-        vm.prank(bob);
-        register.refreshDelegation(alice);
-
-        assertEq(register.getParticipant(alice).delegation, newDelegation);
-    }
-
-    function test_refreshDelegation_updatesReverseIndex() public {
-        _registerAlice();
-
-        address newDelegation = makeAddr("newDelegation");
-        mockEntityManager.setDelegation(alice, newDelegation);
-
-        register.refreshDelegation(alice);
-
-        // Old delegation cleared
-        assertEq(register.getByDelegationAddress(aliceDelegation).owner, address(0));
-        // New delegation works
-        assertEq(register.getByDelegationAddress(newDelegation).owner, alice);
-    }
-
-    function test_refreshDelegation_noChange() public {
-        vm.roll(100);
-        _registerAlice();
-
-        vm.roll(200);
-        register.refreshDelegation(alice);
-
-        assertEq(register.getParticipant(alice).updatedAt, 100); // unchanged
-    }
-
-    function test_refreshDelegation_revertsIfNotRegistered() public {
-        vm.expectRevert(IParticipantRegister.NotRegistered.selector);
-        register.refreshDelegation(protocol);
-    }
-
-    // ---------------------------------------------------------------
-    // Delegation lookup
-    // ---------------------------------------------------------------
-
-    function test_getByDelegationAddress() public {
-        _registerAlice();
-        assertEq(register.getByDelegationAddress(aliceDelegation).owner, alice);
-    }
-
-    function test_getByDelegationAddress_afterDelegationChange() public {
-        _registerAlice();
-
-        address newDelegation = makeAddr("newDelegation");
-        mockEntityManager.setDelegation(alice, newDelegation);
-
-        vm.prank(alice);
-        register.register(INFO_AP);
-
-        assertEq(register.getByDelegationAddress(aliceDelegation).owner, address(0));
-        assertEq(register.getByDelegationAddress(newDelegation).owner, alice);
-    }
-
-    function test_getByDelegationAddress_unknownReturnsEmpty() public view {
-        assertEq(register.getByDelegationAddress(address(0xdead)).owner, address(0));
     }
 
     // ---------------------------------------------------------------
@@ -328,7 +187,6 @@ contract ParticipantRegisterTest is Test {
     function test_activeCount_onUnregister() public {
         _registerAlice();
         _registerBob();
-
         vm.prank(alice);
         register.unregister();
         assertEq(register.activeCount(), 1);
@@ -363,6 +221,17 @@ contract ParticipantRegisterTest is Test {
         vm.prank(alice);
         register.unregister();
         assertEq(register.activeCount(), 0);
+    }
+
+    // ---------------------------------------------------------------
+    // FLR rejection
+    // ---------------------------------------------------------------
+
+    function test_rejectFLR() public {
+        vm.deal(alice, 1 ether);
+        vm.prank(alice);
+        (bool sent,) = address(register).call{value: 1 ether}("");
+        assertFalse(sent);
     }
 
     // ---------------------------------------------------------------
@@ -508,8 +377,6 @@ contract ParticipantRegisterTest is Test {
     function test_manyParticipants() public {
         for (uint256 i = 0; i < 20; i++) {
             address user = makeAddr(string(abi.encodePacked("user", vm.toString(i))));
-            address del = makeAddr(string(abi.encodePacked("del", vm.toString(i))));
-            mockEntityManager.setDelegation(user, del);
             vm.prank(user);
             register.register(
                 string(abi.encodePacked("https://example.com/", vm.toString(i), "/participant.json"))
@@ -523,12 +390,5 @@ contract ParticipantRegisterTest is Test {
         IParticipantRegister.Participant[] memory page2 = register.getParticipants(10, 10);
         assertEq(page1.length, 10);
         assertEq(page2.length, 10);
-    }
-
-    function test_manyParticipants_delegationLookup() public {
-        _registerAlice();
-        _registerBob();
-        assertEq(register.getByDelegationAddress(aliceDelegation).owner, alice);
-        assertEq(register.getByDelegationAddress(bobDelegation).owner, bob);
     }
 }

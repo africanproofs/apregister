@@ -2,33 +2,32 @@
 pragma solidity 0.8.20;
 
 import {IParticipantRegister} from "./IParticipantRegister.sol";
-import {IEntityManager} from "./IEntityManager.sol";
 
 /// @title ParticipantRegister
 /// @author African Proofs (https://proofs.africa)
-/// @notice Links Flare ecosystem participants to their metadata.
+/// @notice Maps Flare ecosystem entities to their metadata URI.
 ///
 /// Any address can register — providers, protocols, DAOs. The contract stores
 /// only the pointer (infoURI). All metadata lives in the JSON at that URL.
 ///
-/// Delegation addresses are cached from EntityManager for participants that
-/// have one (infrastructure providers). Non-providers get address(0).
+/// No admin. No ownership. No external dependencies. No funds held.
 ///
 /// @dev Append-only: unregistering sets active = false, never removes the record.
+/// The _isRegistered check uses _index[_participants[addr].index] == addr for O(1)
+/// lookup. This works because unregistered addresses have index = 0 (default) but
+/// _index[0] is the first registrant, not the queried address — so the equality
+/// check fails correctly. The empty-registry case is caught by the length check.
 contract ParticipantRegister is IParticipantRegister {
 
     uint256 private constant MAX_URI = 256;
 
-    /// @notice EntityManager — authoritative source for delegation addresses.
-    IEntityManager public immutable entityManager;
-
     mapping(address => Participant) private _participants;
-    mapping(address => address) private _delegationToVoter;
     address[] private _index;
     uint256 private _activeCount;
 
-    constructor(IEntityManager _entityManager) {
-        entityManager = _entityManager;
+    /// @dev Reject any FLR sent to this contract. No funds should be held here.
+    receive() external payable {
+        revert();
     }
 
     /// @inheritdoc IParticipantRegister
@@ -36,17 +35,10 @@ contract ParticipantRegister is IParticipantRegister {
         if (bytes(infoURI).length == 0) revert EmptyInfoURI();
         if (bytes(infoURI).length > MAX_URI) revert UriTooLong();
 
-        address delegation = entityManager.getDelegationAddressOf(msg.sender);
-
         if (_isRegistered(msg.sender)) {
-            address oldDelegation = _participants[msg.sender].delegation;
-            if (oldDelegation != delegation && oldDelegation != address(0)) {
-                delete _delegationToVoter[oldDelegation];
-            }
             if (!_participants[msg.sender].active) {
                 _activeCount++;
             }
-            _participants[msg.sender].delegation = delegation;
             _participants[msg.sender].infoURI = infoURI;
             _participants[msg.sender].active = true;
             _participants[msg.sender].updatedAt = block.number;
@@ -54,7 +46,6 @@ contract ParticipantRegister is IParticipantRegister {
             _index.push(msg.sender);
             _participants[msg.sender] = Participant({
                 owner: msg.sender,
-                delegation: delegation,
                 infoURI: infoURI,
                 active: true,
                 index: _index.length - 1,
@@ -64,16 +55,7 @@ contract ParticipantRegister is IParticipantRegister {
             _activeCount++;
         }
 
-        if (delegation != address(0)) {
-            _delegationToVoter[delegation] = msg.sender;
-        }
-
-        emit ParticipantRegistered(
-            msg.sender,
-            delegation,
-            _participants[msg.sender].index,
-            infoURI
-        );
+        emit ParticipantRegistered(msg.sender, _participants[msg.sender].index, infoURI);
     }
 
     /// @inheritdoc IParticipantRegister
@@ -88,30 +70,8 @@ contract ParticipantRegister is IParticipantRegister {
     }
 
     /// @inheritdoc IParticipantRegister
-    function refreshDelegation(address addr) external {
-        if (!_isRegistered(addr)) revert NotRegistered();
-        address oldDelegation = _participants[addr].delegation;
-        address newDelegation = entityManager.getDelegationAddressOf(addr);
-        if (oldDelegation != newDelegation) {
-            if (oldDelegation != address(0)) {
-                delete _delegationToVoter[oldDelegation];
-            }
-            _participants[addr].delegation = newDelegation;
-            if (newDelegation != address(0)) {
-                _delegationToVoter[newDelegation] = addr;
-            }
-            _participants[addr].updatedAt = block.number;
-        }
-    }
-
-    /// @inheritdoc IParticipantRegister
     function getParticipant(address addr) external view returns (Participant memory) {
         return _participants[addr];
-    }
-
-    /// @inheritdoc IParticipantRegister
-    function getByDelegationAddress(address delegation) external view returns (Participant memory) {
-        return _participants[_delegationToVoter[delegation]];
     }
 
     /// @inheritdoc IParticipantRegister
@@ -120,6 +80,7 @@ contract ParticipantRegister is IParticipantRegister {
     }
 
     /// @inheritdoc IParticipantRegister
+    /// @dev Iterates full index — intended for off-chain eth_call only.
     function getActiveParticipants() external view returns (address[] memory) {
         uint256 len = _index.length;
         address[] memory result = new address[](_activeCount);
@@ -167,6 +128,9 @@ contract ParticipantRegister is IParticipantRegister {
         return _activeCount;
     }
 
+    /// @dev O(1) registration check. Works because unregistered addresses default
+    /// to index 0, but _index[0] is the first actual registrant — the equality
+    /// check fails correctly. Empty registry caught by length check.
     function _isRegistered(address addr) internal view returns (bool) {
         if (_index.length == 0) return false;
         return _index[_participants[addr].index] == addr;
