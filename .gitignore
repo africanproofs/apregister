@@ -1,6 +1,14 @@
-__pycache__
+# Foundry
+out/
+cache/
+broadcast/
+
+# Environment
 .env
-.history
-.hypothesis/
-build/
-reports/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store

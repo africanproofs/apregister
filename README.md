@@ -1,88 +1,152 @@
-African Proofs proposes an on-chain mechanism to enable Flare and Songbird participants to self-manage data about their offerings. The mechanism involves a smart contract deployed on-chain, allowing participants to publish a pointer to a self hosted and standardised file containing information on the participant. This is intended for use by price providers and state connector validators.
+# Flare Participant Register
 
-**This information would also be useful for devs implementing on the Flare and Songbird chains, as they make decisions about which endpoints would be best performers for their Dapps.**
+A permissionless on-chain registry for Flare and Songbird infrastructure participants. Data providers, validators, and FDC operators register with metadata (name, description, logo, website) and a URL to a standardized JSON file describing their offerings.
 
-## Flare Participant Register Contract
-The contract is intended to facilitate a decentralised method to, in a permissionless manner; 1.) Notify other chain participants of the existence of chain infrastructure offerings, 2.) Allow for an exchange of meta information amongst and about chain providers and validators.
+**No admin. No ownership. No gatekeepers. Fully permissionless.**
 
-### How it works.
+### Why?
 
-**From the validator/provider side:**
-The contract exposes two state altering functions i.e. *register* and *unregister*. 
-A call to the *register* function requires two parameters, namely 1) The name of the provider; 2) An http/https url pointer to information about the sender. The new record is given a status of 1, denoting that the record is active. 
+The current canonical source for FTSO provider metadata is a centralized GitHub repo maintained by a single entity (TowoLabs). Every ecosystem tool (flaremetrics.io, flare.builders, Bifrost Wallet) depends on it. Providers who don't submit a PR are displayed as raw hex addresses. The maintainer is also a competing provider.
 
-A call to the *unregister* function takes no parameters and sets the status to 0. This indicates to the consumer that the record is inactive. The data is not removed. A subsequent call to *register*, will set the status to 1, once more.
+This contract moves provider identity on-chain, where it belongs. Any participant can register and update their metadata at any time without approval from anyone.
 
-In order to update the record, the sender is required to send another *register* transaction/call with the new information.
+## Contract
 
-The *register* and *unregister* functions MUST be signed by the participant.
+### Write Functions
 
-**From the data consumer side:**	
-Once registered, other stakeholders such as dapp developers can use the information as a reference and a starting point in sourcing data about the deployed chain infrastructure. This can be done using the contract's two data acquisition functions, namely *getAllParticipants* and *getParticipant*.
+| Function | Access | Description |
+|----------|--------|-------------|
+| `register(delegation, name, description, url, logoURI, infoURI)` | Participant | Register or update. Sets `active = true`. |
+| `unregister()` | Participant | Deactivate. Data retained, marked inactive. |
 
-A call to *getAllParticipants* takes no parameters and returns a list of ALL registered addresses, irrespective of the status.
+### Read Functions
 
-A call to *getParticipant* requires a registered address as a parameter. The call returns a tuple data structure with the following data (address, name_of_participant, pointer_url, status ).
+| Function | Description |
+|----------|-------------|
+| `getParticipant(address)` | Look up by voter/identity address. |
+| `getByDelegationAddress(address)` | Look up by delegation address. |
+| `getAllParticipants()` | All registered addresses (active + inactive). |
+| `getActiveParticipants()` | Only active addresses. |
+| `getParticipants(offset, limit)` | Paginated retrieval of full metadata. |
+| `isRegistered(address)` | Check if an address has ever registered. |
+| `participantCount()` | Total registered count. |
 
-The contract has no admin facility.
+### Events
 
+- `ParticipantRegistered(owner, delegation, index, name, url, logoURI)`
+- `ParticipantUnregistered(owner, index)`
 
-## Standardised Flare Participant File.
-**A Standardized JSON file for Flare Validators and Providers to publish as their info URL field when calling the register action on the Flare Participant Register Contract.**
+### On-Chain Metadata
 
-### THE PARTICIPANT DECIDES WHAT THEY PUBLISH. NO AUTHORITY.
+Each participant stores:
 
-- name: Name of validator or price provider
-- chains: [Array]
-    - chain_id: Chain ID where this data is applicable,
-    - address: EVM address associated to the participant
-- organisation: {Object}
-  - branding: {Object} - Logo images
-      - logo_128: Entire url to image 128x128px
-      - logo_256: Entire url to image 256x256px 
-      - logo_1024: Entire url to image 1024x1024px
-      - logo_svg: Entire url to image svg
-   - location: {Object} - Organization location
-      - name: Location in human readable format [City, State]
-      - country: Country code [XX] in accordance to [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-      - latitude: Latitude in decimal degrees
-      - longitude: Longitude in decimal degrees
-    },
-  - contact: {Object} 
-    - website: Valid website URL
-    - email: Primary contact email address
-    - discord: Full server
-    - telegram: Username ONLY NOT URL
-    - twitter: Username ONLY NOT URL
-    - git: Orgarnisation Github/Gitlab url
-    - youtube: Organisation Channel address
-    - wechat: Username
-- infrastructure: [Array]
-    - chain: Flare or Songbird
-    - location: {Object} - Physical location of the infrastructure
-        - name: Location in human readable format [City, State]
-        - country: Country code [XX]
-        - latitude: Latitude in decimal degrees
-        - longitude: Longitude in decimal degrees
-    - rpc_endpoint: Chain RPC endpoint
-    - ws_endpoint: Chain WS endpoint
+| Field | Required | Description |
+|-------|----------|-------------|
+| `delegation` | No | Delegation address (for toolmaker reverse lookup) |
+| `name` | Yes | Display name (max 32 chars recommended) |
+| `description` | No | Short description (max 350 chars recommended) |
+| `url` | Yes | Website URL |
+| `logoURI` | No | Direct URL to logo image (128-256px PNG) |
+| `infoURI` | No | URL to full standardized JSON metadata file |
+| `registeredAt` | Auto | Block number of first registration |
+| `updatedAt` | Auto | Block number of last update |
 
-## Validator and Price Provider Instructions 
-Copy the [template](https://gitlab.com/proofs.africa/flare-participant-register/assets/participant.template.json) provided on this repo. Name the file participant.json
+The registry is append-only: unregistering sets `active = false` but never removes the record. Re-registering reactivates the entry with updated data.
 
-Update the template with information specific to your organisation. Ensure that you provide as much and as accurate data as possible.
+## Participant Metadata File
 
-Upload the file to a publicly accessable endpoint. Could be your website, online git service, dropbox etc.
+For extended metadata beyond what's stored on-chain, participants host a standardized JSON file at their `infoURI`. See [`assets/participant.template.json`](assets/participant.template.json) for the template.
 
-Ensure that the URL is downloadable by tools such as curl, wget etc.
+**The participant decides what they publish. No authority.**
 
-## Deployment
+Fields include:
+- **chains** — Chain IDs and associated addresses
+- **organisation** — Branding (logos), location, contact (website, email, Discord, Telegram, Twitter, Git)
+- **infrastructure** — Per-chain details: location, RPC endpoint, WebSocket endpoint
 
-A TEST contract is deployed on Songbird at the following address {address}. There will be a feedback period until {date}.
+### Registration Instructions
 
-## Meta Info and Links
-The current version number of the specification file is **v0.1.0** and it is compliant with the JSON schema [Draft 2019-09](https://json-schema.org/specification-links.html#2019-09-formerly-known-as-draft-8)
+1. Copy the [template](assets/participant.template.json) and host it at a public URL
+2. Call `register()` on the deployed contract with your metadata
+3. Update anytime by calling `register()` again
 
-One can check for data validity using: https://www.jsonschemavalidator.net/
+## For Toolmakers
 
-Mechanism finds inspiration from work done by [EOSRIO](https://eosrio.io/)
+The contract is designed for easy integration by ecosystem dashboards and wallets.
+
+**Bulk fetch** all providers with pagination:
+```solidity
+// Get first 50 participants
+Participant[] memory page = register.getParticipants(0, 50);
+```
+
+**Delegation lookup** (how wallets find provider metadata):
+```solidity
+// User delegates to 0x1234... — look up who that is
+Participant memory p = register.getByDelegationAddress(delegationAddress);
+// p.name, p.logoURI, p.description are ready to display
+```
+
+**Active-only filtering**:
+```solidity
+address[] memory active = register.getActiveParticipants();
+```
+
+**Events for indexers** — `ParticipantRegistered` emits indexed `owner` and `delegation` for efficient subgraph queries.
+
+## Development
+
+Built with [Foundry](https://getfoundry.sh/). Solidity 0.8.20, EVM London.
+
+```bash
+forge build
+forge test -vvv
+forge test --gas-report
+```
+
+### Deploy
+
+```bash
+forge script script/Deploy.s.sol --rpc-url $SONGBIRD_RPC --broadcast --private-key $PRIVATE_KEY
+forge script script/Deploy.s.sol --rpc-url $FLARE_RPC --broadcast --private-key $PRIVATE_KEY
+```
+
+### Docker
+
+A `forge.sh` wrapper is provided for systems where the native Foundry binary requires a newer glibc:
+
+```bash
+./forge.sh build
+./forge.sh test -vvv
+```
+
+## Deployments
+
+| Network | Address | Chain ID |
+|---------|---------|----------|
+| Songbird | TBD | 19 |
+| Flare | TBD | 14 |
+
+## Research & Planning
+
+| Document | Description |
+|---|---|
+| [01-architecture.md](research/01-architecture.md) | Contract architecture, storage design, relationship to EntityManager |
+| [02-competitive-positioning.md](research/02-competitive-positioning.md) | TowoLabs incumbent analysis, why AP register wins, competitive response risk |
+| [03-security-analysis.md](research/03-security-analysis.md) | Minimised attack surface review, 5 griefing vectors, recommended fixes |
+| [04-adoption-strategy.md](research/04-adoption-strategy.md) | Target providers, outreach timeline, messaging by audience, success metrics |
+| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes → tests → testnet → mainnet), resource plan, timeline |
+
+## Related Projects
+
+| Project | Relationship |
+|---|---|
+| **apdao** | Bond Pool contract. Register demonstrates AP's smart contract capability before asking community to trust the Bond Pool |
+| **apsocial** | Register deployment is apsocial content. Growth milestones are posts |
+| **proofs.africa** | Integration guide published on proofs.africa. Register listed as AP project |
+| **flaremetrics.io** | Target integration — Tim Rowley reads from contract instead of TowoLabs JSON |
+| **flare.builders** | Target integration — NeilD reads from contract instead of TowoLabs JSON |
+
+## License
+
+MIT
