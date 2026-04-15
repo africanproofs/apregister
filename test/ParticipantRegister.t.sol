@@ -155,6 +155,20 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.typeCount(TOOL), 1);
     }
 
+    function test_register_withReservedType() public {
+        IParticipantRegister.ParticipantType reserved7 = IParticipantRegister.ParticipantType.Reserved7;
+
+        vm.prank(alice);
+        register.register(reserved7, INFO_AP);
+
+        assertTrue(register.getParticipant(alice).participantType == reserved7);
+        assertEq(register.typeCount(reserved7), 1);
+
+        address[] memory reserved = register.getParticipantsByType(reserved7);
+        assertEq(reserved.length, 1);
+        assertEq(reserved[0], alice);
+    }
+
     function test_typeCount() public {
         vm.prank(alice);
         register.register(PROVIDER, INFO_AP);
