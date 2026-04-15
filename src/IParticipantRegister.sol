@@ -14,6 +14,8 @@ pragma solidity 0.8.20;
 interface IParticipantRegister {
 
     /// @notice Participant type — determines how tools categorize the entity.
+    /// Types 0-6 are defined. Types 7-19 are reserved for future use —
+    /// assign meaning via off-chain convention without redeploying the contract.
     enum ParticipantType {
         Provider,       // 0 — FTSO, validators, FDC operators (default)
         DeFi,           // 1 — lending, DEX, yield, staking protocols
@@ -21,7 +23,20 @@ interface IParticipantRegister {
         Tool,           // 3 — explorers, analytics, dev tools
         FAssetsAgent,   // 4 — FAssets minting agents
         Exchange,       // 5 — CEX/DEX with Flare listings
-        App             // 6 — games, NFT projects, general dApps
+        App,            // 6 — games, NFT projects, general dApps
+        Reserved7,      // 7 — future use
+        Reserved8,      // 8
+        Reserved9,      // 9
+        Reserved10,     // 10
+        Reserved11,     // 11
+        Reserved12,     // 12
+        Reserved13,     // 13
+        Reserved14,     // 14
+        Reserved15,     // 15
+        Reserved16,     // 16
+        Reserved17,     // 17
+        Reserved18,     // 18
+        Reserved19      // 19
     }
 
     /// @notice On-chain participant record.
