@@ -5,18 +5,19 @@ import {IParticipantRegister} from "./IParticipantRegister.sol";
 
 /// @title ParticipantRegister
 /// @author African Proofs (https://proofs.africa)
-/// @notice Maps Flare ecosystem entities to their metadata URI.
+/// @notice Maps Flare ecosystem entities to their type and metadata URI.
 ///
-/// Any address can register — providers, protocols, DAOs. The contract stores
-/// only the pointer (infoURI). All metadata lives in the JSON at that URL.
+/// Any address can register — providers, protocols, wallets, tools, agents,
+/// exchanges, apps. The contract stores type (for on-chain filtering) and
+/// infoURI (pointer to off-chain JSON-LD metadata).
 ///
 /// No admin. No ownership. No external dependencies. No funds held.
 ///
 /// @dev Append-only: unregistering sets active = false, never removes the record.
 /// The _isRegistered check uses _index[_participants[addr].index] == addr for O(1)
-/// lookup. This works because unregistered addresses have index = 0 (default) but
-/// _index[0] is the first registrant, not the queried address — so the equality
-/// check fails correctly. The empty-registry case is caught by the length check.
+/// lookup. This works because unregistered addresses default to index 0, but
+/// _index[0] is the first registrant — the equality check fails correctly.
+/// Empty registry caught by the length check.
 contract ParticipantRegister is IParticipantRegister {
 
     uint256 private constant MAX_URI = 256;
@@ -24,21 +25,31 @@ contract ParticipantRegister is IParticipantRegister {
     mapping(address => Participant) private _participants;
     address[] private _index;
     uint256 private _activeCount;
+    mapping(ParticipantType => uint256) private _typeCounts;
 
-    /// @dev Reject any FLR sent to this contract. No funds should be held here.
+    /// @dev Reject any FLR sent to this contract.
     receive() external payable {
         revert();
     }
 
     /// @inheritdoc IParticipantRegister
-    function register(string calldata infoURI) external {
+    function register(ParticipantType participantType, string calldata infoURI) external {
         if (bytes(infoURI).length == 0) revert EmptyInfoURI();
         if (bytes(infoURI).length > MAX_URI) revert UriTooLong();
 
         if (_isRegistered(msg.sender)) {
-            if (!_participants[msg.sender].active) {
+            ParticipantType oldType = _participants[msg.sender].participantType;
+            bool wasActive = _participants[msg.sender].active;
+
+            if (!wasActive) {
                 _activeCount++;
+                _typeCounts[participantType]++;
+            } else if (oldType != participantType) {
+                _typeCounts[oldType]--;
+                _typeCounts[participantType]++;
             }
+
+            _participants[msg.sender].participantType = participantType;
             _participants[msg.sender].infoURI = infoURI;
             _participants[msg.sender].active = true;
             _participants[msg.sender].updatedAt = block.number;
@@ -46,6 +57,7 @@ contract ParticipantRegister is IParticipantRegister {
             _index.push(msg.sender);
             _participants[msg.sender] = Participant({
                 owner: msg.sender,
+                participantType: participantType,
                 infoURI: infoURI,
                 active: true,
                 index: _index.length - 1,
@@ -53,9 +65,10 @@ contract ParticipantRegister is IParticipantRegister {
                 updatedAt: block.number
             });
             _activeCount++;
+            _typeCounts[participantType]++;
         }
 
-        emit ParticipantRegistered(msg.sender, _participants[msg.sender].index, infoURI);
+        emit ParticipantRegistered(msg.sender, participantType, _participants[msg.sender].index, infoURI);
     }
 
     /// @inheritdoc IParticipantRegister
@@ -63,6 +76,7 @@ contract ParticipantRegister is IParticipantRegister {
         if (!_isRegistered(msg.sender)) revert NotRegistered();
         if (_participants[msg.sender].active) {
             _activeCount--;
+            _typeCounts[_participants[msg.sender].participantType]--;
         }
         _participants[msg.sender].active = false;
         _participants[msg.sender].updatedAt = block.number;
@@ -87,6 +101,22 @@ contract ParticipantRegister is IParticipantRegister {
         uint256 j = 0;
         for (uint256 i = 0; i < len; i++) {
             if (_participants[_index[i]].active) {
+                result[j++] = _index[i];
+            }
+        }
+        return result;
+    }
+
+    /// @inheritdoc IParticipantRegister
+    /// @dev Iterates full index — intended for off-chain eth_call only.
+    function getParticipantsByType(ParticipantType participantType) external view returns (address[] memory) {
+        uint256 len = _index.length;
+        uint256 count = _typeCounts[participantType];
+        address[] memory result = new address[](count);
+        uint256 j = 0;
+        for (uint256 i = 0; i < len; i++) {
+            Participant storage p = _participants[_index[i]];
+            if (p.active && p.participantType == participantType) {
                 result[j++] = _index[i];
             }
         }
@@ -128,9 +158,11 @@ contract ParticipantRegister is IParticipantRegister {
         return _activeCount;
     }
 
-    /// @dev O(1) registration check. Works because unregistered addresses default
-    /// to index 0, but _index[0] is the first actual registrant — the equality
-    /// check fails correctly. Empty registry caught by length check.
+    /// @inheritdoc IParticipantRegister
+    function typeCount(ParticipantType participantType) external view returns (uint256) {
+        return _typeCounts[participantType];
+    }
+
     function _isRegistered(address addr) internal view returns (bool) {
         if (_index.length == 0) return false;
         return _index[_participants[addr].index] == addr;
