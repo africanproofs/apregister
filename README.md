@@ -53,22 +53,64 @@ Each participant stores:
 
 The registry is append-only: unregistering sets `active = false` but never removes the record. Re-registering reactivates the entry with updated data.
 
-## Participant Metadata File
+## participant.json Schema
 
-For extended metadata beyond what's stored on-chain, participants host a standardized JSON file at their `infoURI`. See [`assets/participant.template.json`](assets/participant.template.json) for the template.
+The contract stores only a pointer (`infoURI`). All metadata lives in the JSON-LD file at that URL.
 
-**The participant decides what they publish. No authority.**
+**Design principle**: No duplication. Addresses, nodes, and keys are on-chain in EntityManager. participant.json contains only what ISN'T on-chain — name, logo, contact, services, infrastructure location.
 
-Fields include:
-- **chains** — Chain IDs and associated addresses
-- **organisation** — Branding (logos), location, contact (website, email, Discord, Telegram, Twitter, Git)
-- **infrastructure** — Per-chain details: location, RPC endpoint, WebSocket endpoint
+### Required Fields
 
-### Registration Instructions
+| Field | Type | Description |
+|---|---|---|
+| `name` | string (max 64) | Display name |
+| `url` | string (max 256) | Website URL |
 
-1. Copy the [template](assets/participant.template.json) and host it at a public URL
-2. Call `register()` on the deployed contract with your metadata
-3. Update anytime by calling `register()` again
+### Recommended Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `description` | string (max 350) | Short description |
+| `logo` | string (URL) | Square logo image (PNG, min 128px) |
+
+### Optional Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `flare:social` | object | Usernames: `twitter`, `telegram`, `discord`, `github` |
+| `flare:location` | object | Organization domicile: `country` (ISO 3166-1 alpha-2) |
+| `flare:services` | string[] | What the entity runs: `ftso`, `fdc`, `fast-updates`, `validator`, `fassets-agent`, `lending`, `dex`, `staking` |
+| `flare:nodes` | object[] | Node declarations: `network` + `role` + `country`. Physical infrastructure location |
+| `flare:rpc` | object[] | Public RPC endpoints: `network` + `url` |
+
+`flare:location.country` = where the organization is domiciled.  
+`flare:nodes[].country` = where each node physically runs. Different things.
+
+### Examples
+
+**Full provider** — see [`assets/participant.template.json`](assets/participant.template.json)
+
+**Minimum valid file** — see [`assets/participant.minimal.json`](assets/participant.minimal.json):
+```json
+{
+  "@context": { "@vocab": "https://schema.org/", "flare": "https://proofs.africa/ns/participant#" },
+  "@type": "Organization",
+  "name": "My Provider",
+  "url": "https://example.com"
+}
+```
+
+**Validation schema** — [`assets/participant.schema.json`](assets/participant.schema.json)
+
+### Why JSON-LD?
+
+The `@context` makes the file self-describing. Any JSON-LD parser — including AI agents — understands Schema.org fields (`name`, `url`, `logo`, `description`) without prior knowledge of this spec. Flare-specific fields use the `flare:` namespace prefix.
+
+### Registration
+
+1. Host your `participant.json` at a public URL
+2. Call `register("https://yoursite.com/participant.json")` with your entity address
+3. Update anytime by calling `register()` again with a new URI
 
 ## For Toolmakers
 

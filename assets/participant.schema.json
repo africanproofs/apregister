@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proofs.africa/ns/participant/schema.json",
+  "title": "Flare Participant Metadata",
+  "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract.",
+  "type": "object",
+  "required": ["@context", "@type", "name", "url"],
+  "properties": {
+    "@context": {
+      "type": "object",
+      "description": "JSON-LD context. Must include Schema.org vocab and flare namespace."
+    },
+    "@type": {
+      "type": "string",
+      "const": "Organization"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Display name of the participant."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 350,
+      "description": "Short description of the participant and their services."
+    },
+    "url": {
+      "type": "string",
+      "maxLength": 256,
+      "format": "uri",
+      "description": "Website URL."
+    },
+    "logo": {
+      "type": "string",
+      "maxLength": 256,
+      "format": "uri",
+      "description": "Direct URL to a square logo image (PNG, min 128px)."
+    },
+    "flare:social": {
+      "type": "object",
+      "description": "Social media usernames (not full URLs).",
+      "properties": {
+        "twitter": { "type": "string", "maxLength": 64 },
+        "telegram": { "type": "string", "maxLength": 64 },
+        "discord": { "type": "string", "maxLength": 64 },
+        "github": { "type": "string", "maxLength": 64 }
+      },
+      "additionalProperties": false
+    },
+    "flare:location": {
+      "type": "object",
+      "description": "Organization domicile.",
+      "properties": {
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code."
+        }
+      },
+      "additionalProperties": false
+    },
+    "flare:services": {
+      "type": "array",
+      "description": "Services the participant operates.",
+      "items": {
+        "type": "string",
+        "enum": ["ftso", "fdc", "fast-updates", "validator", "fassets-agent", "lending", "dex", "staking"]
+      }
+    },
+    "flare:nodes": {
+      "type": "array",
+      "description": "Infrastructure node declarations. Declares where nodes run physically.",
+      "items": {
+        "type": "object",
+        "required": ["network", "role", "country"],
+        "properties": {
+          "network": {
+            "type": "string",
+            "enum": ["flare", "songbird", "coston2", "coston"]
+          },
+          "role": {
+            "type": "string",
+            "enum": ["validator", "observer", "fdc-verifier", "rpc", "indexer"]
+          },
+          "country": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "ISO 3166-1 alpha-2 country code where the node physically runs."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "flare:rpc": {
+      "type": "array",
+      "description": "Public RPC endpoints offered by this participant.",
+      "items": {
+        "type": "object",
+        "required": ["network", "url"],
+        "properties": {
+          "network": {
+            "type": "string",
+            "enum": ["flare", "songbird", "coston2", "coston"]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 256
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,46 +1,35 @@
 {
-    "name": "",
-    "chains": [
-        {
-            "chain_id": 0,
-            "address": ""
-        }
-    ],
-    "organisation": {
-      "branding":{
-        "logo_128":"",
-        "logo_256":"",
-        "logo_1024":"",
-        "logo_svg":""
-      },
-      "location": {
-        "name": "",
-        "country": "",
-        "latitude": 0,
-        "longitude": 0
-      },
-      "contact": {
-        "website": "",
-        "email":"",
-        "git":"",
-        "discord": "",
-        "telegram": "",
-        "twitter": "",
-        "youtube": "",
-        "wechat":""
-      }
-    },
-    "infrastructure": [
-      {
-        "chain": "",
-        "location": {
-          "name": "",
-          "country": "",
-          "latitude": 0,
-          "longitude": 0
-        },
-        "rpc_endpoint": "",
-        "ws_endpoint": ""
-      }
-    ]
-  }
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "flare": "https://proofs.africa/ns/participant#"
+  },
+  "@type": "Organization",
+
+  "name": "African Proofs",
+  "description": "Flare infrastructure provider — ML-powered oracle, full FDC verification, dual-chain operation on Flare and Songbird",
+  "url": "https://proofs.africa",
+  "logo": "https://proofs.africa/logo-256.png",
+
+  "flare:social": {
+    "twitter": "africanproofs",
+    "telegram": "africanproofs"
+  },
+
+  "flare:location": {
+    "country": "ZA"
+  },
+
+  "flare:services": ["ftso", "fdc", "fast-updates", "validator"],
+
+  "flare:nodes": [
+    { "network": "flare", "role": "validator", "country": "FR" },
+    { "network": "flare", "role": "observer", "country": "FR" },
+    { "network": "songbird", "role": "observer", "country": "FR" },
+    { "network": "flare", "role": "fdc-verifier", "country": "FR" }
+  ],
+
+  "flare:rpc": [
+    { "network": "flare", "url": "https://rpc.au.cc/flare" },
+    { "network": "songbird", "url": "https://rpc.au.cc/songbird" }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "flare": "https://proofs.africa/ns/participant#"
+  },
+  "@type": "Organization",
+  "name": "My Provider",
+  "url": "https://example.com"
+}
