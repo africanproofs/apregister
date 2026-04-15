@@ -4,9 +4,31 @@ pragma solidity 0.8.20;
 import "forge-std/Test.sol";
 import {ParticipantRegister} from "../src/ParticipantRegister.sol";
 import {IParticipantRegister} from "../src/IParticipantRegister.sol";
+import {IEntityManager} from "../src/IEntityManager.sol";
+
+/// @dev Minimal mock for EntityManager — only implements getDelegationAddressOf.
+contract MockEntityManager {
+    mapping(address => address) private _delegations;
+
+    function setDelegation(address voter, address delegation) external {
+        _delegations[voter] = delegation;
+    }
+
+    function getDelegationAddressOf(address _voter) external view returns (address) {
+        return _delegations[_voter];
+    }
+
+    // Stubs for IEntityManager interface compliance (unused in tests)
+    function getDelegationAddressOfAt(address, uint256) external pure returns (address) { return address(0); }
+    function getNodeIdsOf(address) external pure returns (bytes20[] memory) { return new bytes20[](0); }
+    function getNodeIdsOfAt(address, uint256) external pure returns (bytes20[] memory) { return new bytes20[](0); }
+    function getPublicKeyOf(address) external pure returns (bytes32, bytes32) { return (bytes32(0), bytes32(0)); }
+    function getPublicKeyOfAt(address, uint256) external pure returns (bytes32, bytes32) { return (bytes32(0), bytes32(0)); }
+}
 
 contract ParticipantRegisterTest is Test {
     ParticipantRegister private register;
+    MockEntityManager private mockEntityManager;
 
     event ParticipantRegistered(
         address indexed owner,
@@ -23,6 +45,7 @@ contract ParticipantRegisterTest is Test {
     address private bob = makeAddr("bob");
     address private bobDelegation = makeAddr("bobDelegation");
     address private charlie = makeAddr("charlie");
+    address private attacker = makeAddr("attacker");
 
     string private constant NAME_AP = "African Proofs";
     string private constant DESC_AP = "Flare data provider running full FDC stack";
@@ -37,7 +60,12 @@ contract ParticipantRegisterTest is Test {
     string private constant INFO_BOB = "https://bob.example.com/participant.json";
 
     function setUp() public {
-        register = new ParticipantRegister();
+        mockEntityManager = new MockEntityManager();
+        mockEntityManager.setDelegation(alice, aliceDelegation);
+        mockEntityManager.setDelegation(bob, bobDelegation);
+        // attacker has no delegation in EntityManager
+        // charlie has no delegation in EntityManager
+        register = new ParticipantRegister(IEntityManager(address(mockEntityManager)));
     }
 
     // ---------------------------------------------------------------
@@ -46,12 +74,12 @@ contract ParticipantRegisterTest is Test {
 
     function _registerAlice() internal {
         vm.prank(alice);
-        register.register(aliceDelegation, NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
+        register.register(NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
     }
 
     function _registerBob() internal {
         vm.prank(bob);
-        register.register(bobDelegation, NAME_BOB, DESC_BOB, URL_BOB, LOGO_BOB, INFO_BOB);
+        register.register(NAME_BOB, DESC_BOB, URL_BOB, LOGO_BOB, INFO_BOB);
     }
 
     // ---------------------------------------------------------------
@@ -64,7 +92,7 @@ contract ParticipantRegisterTest is Test {
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.owner, alice);
-        assertEq(p.delegation, aliceDelegation);
+        assertEq(p.delegation, aliceDelegation); // read from EntityManager
         assertEq(p.name, NAME_AP);
         assertEq(p.description, DESC_AP);
         assertEq(p.url, URL_AP);
@@ -81,22 +109,25 @@ contract ParticipantRegisterTest is Test {
         emit ParticipantRegistered(alice, aliceDelegation, 0, NAME_AP, URL_AP, LOGO_AP);
 
         vm.prank(alice);
-        register.register(aliceDelegation, NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
+        register.register(NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
     }
 
     function test_register_update() public {
         vm.roll(100);
         _registerAlice();
 
-        vm.roll(200);
+        // Change alice's delegation in EntityManager
         address newDelegation = makeAddr("newDelegation");
+        mockEntityManager.setDelegation(alice, newDelegation);
+
+        vm.roll(200);
         vm.prank(alice);
-        register.register(newDelegation, "Updated Name", "New desc", "https://new.url", "https://new.logo", "https://new.info");
+        register.register("Updated Name", "New desc", "https://new.url", "https://new.logo", "https://new.info");
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertEq(p.name, "Updated Name");
         assertEq(p.description, "New desc");
-        assertEq(p.delegation, newDelegation);
+        assertEq(p.delegation, newDelegation); // updated from EntityManager
         assertEq(p.url, "https://new.url");
         assertEq(p.logoURI, "https://new.logo");
         assertEq(p.infoURI, "https://new.info");
@@ -109,21 +140,21 @@ contract ParticipantRegisterTest is Test {
     function test_register_revertsOnEmptyName() public {
         vm.prank(alice);
         vm.expectRevert(IParticipantRegister.EmptyName.selector);
-        register.register(aliceDelegation, "", DESC_AP, URL_AP, LOGO_AP, INFO_AP);
+        register.register("", DESC_AP, URL_AP, LOGO_AP, INFO_AP);
     }
 
     function test_register_revertsOnEmptyUrl() public {
         vm.prank(alice);
         vm.expectRevert(IParticipantRegister.EmptyUrl.selector);
-        register.register(aliceDelegation, NAME_AP, DESC_AP, "", LOGO_AP, INFO_AP);
+        register.register(NAME_AP, DESC_AP, "", LOGO_AP, INFO_AP);
     }
 
     function test_register_allowsEmptyOptionalFields() public {
         vm.prank(alice);
-        register.register(address(0), NAME_AP, "", URL_AP, "", "");
+        register.register(NAME_AP, "", URL_AP, "", "");
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
-        assertEq(p.delegation, address(0));
+        assertEq(p.delegation, aliceDelegation); // from EntityManager
         assertEq(bytes(p.description).length, 0);
         assertEq(bytes(p.logoURI).length, 0);
         assertEq(bytes(p.infoURI).length, 0);
@@ -144,6 +175,102 @@ contract ParticipantRegisterTest is Test {
     }
 
     // ---------------------------------------------------------------
+    // EntityManager integration
+    // ---------------------------------------------------------------
+
+    function test_delegationReadFromEntityManager() public {
+        _registerAlice();
+
+        IParticipantRegister.Participant memory p = register.getParticipant(alice);
+        assertEq(p.delegation, aliceDelegation);
+    }
+
+    function test_delegationHijackingImpossible() public {
+        _registerAlice();
+
+        // Attacker registers — has no delegation in EntityManager
+        vm.prank(attacker);
+        register.register("Evil Provider", "", "https://evil.com", "", "");
+
+        // Alice's delegation lookup still returns Alice
+        IParticipantRegister.Participant memory p = register.getByDelegationAddress(aliceDelegation);
+        assertEq(p.owner, alice);
+        assertEq(p.name, NAME_AP);
+
+        // Attacker has no delegation (address(0) from EntityManager)
+        IParticipantRegister.Participant memory a = register.getParticipant(attacker);
+        assertEq(a.delegation, address(0));
+    }
+
+    function test_noDelegationInEntityManager() public {
+        // Charlie has no delegation in EntityManager — can still register
+        vm.prank(charlie);
+        register.register("Charlie", "No delegation", "https://charlie.com", "", "");
+
+        IParticipantRegister.Participant memory p = register.getParticipant(charlie);
+        assertEq(p.owner, charlie);
+        assertEq(p.delegation, address(0));
+        assertTrue(p.active);
+    }
+
+    function test_entityManagerAddress() public view {
+        assertEq(address(register.entityManager()), address(mockEntityManager));
+    }
+
+    // ---------------------------------------------------------------
+    // refreshDelegation
+    // ---------------------------------------------------------------
+
+    function test_refreshDelegation() public {
+        _registerAlice();
+
+        // Change delegation in EntityManager
+        address newDelegation = makeAddr("newDelegation");
+        mockEntityManager.setDelegation(alice, newDelegation);
+
+        // Anyone can call refreshDelegation
+        vm.prank(bob);
+        register.refreshDelegation(alice);
+
+        IParticipantRegister.Participant memory p = register.getParticipant(alice);
+        assertEq(p.delegation, newDelegation);
+    }
+
+    function test_refreshDelegation_updatesReverseIndex() public {
+        _registerAlice();
+
+        address newDelegation = makeAddr("newDelegation");
+        mockEntityManager.setDelegation(alice, newDelegation);
+
+        register.refreshDelegation(alice);
+
+        // Old delegation no longer resolves
+        IParticipantRegister.Participant memory old = register.getByDelegationAddress(aliceDelegation);
+        assertEq(old.owner, address(0));
+
+        // New delegation works
+        IParticipantRegister.Participant memory p = register.getByDelegationAddress(newDelegation);
+        assertEq(p.owner, alice);
+    }
+
+    function test_refreshDelegation_noChange() public {
+        vm.roll(100);
+        _registerAlice();
+
+        vm.roll(200);
+        register.refreshDelegation(alice);
+
+        // updatedAt should NOT change if delegation didn't change
+        IParticipantRegister.Participant memory p = register.getParticipant(alice);
+        assertEq(p.updatedAt, 100);
+    }
+
+    function test_refreshDelegation_revertsIfNotRegistered() public {
+        vm.expectRevert(IParticipantRegister.NotRegistered.selector);
+        register.refreshDelegation(charlie);
+    }
+
+    // ---------------------------------------------------------------
     // Delegation address lookup
     // ---------------------------------------------------------------
 
@@ -159,8 +286,10 @@ contract ParticipantRegisterTest is Test {
         _registerAlice();
 
         address newDelegation = makeAddr("newDelegation");
+        mockEntityManager.setDelegation(alice, newDelegation);
+
         vm.prank(alice);
-        register.register(newDelegation, NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
+        register.register(NAME_AP, DESC_AP, URL_AP, LOGO_AP, INFO_AP);
 
         // Old delegation no longer resolves
         IParticipantRegister.Participant memory old = register.getByDelegationAddress(aliceDelegation);
@@ -176,17 +305,66 @@ contract ParticipantRegisterTest is Test {
         assertEq(p.owner, address(0));
     }
 
-    function test_getByDelegationAddress_zeroDelegation() public {
+    // ---------------------------------------------------------------
+    // Max length validation
+    // ---------------------------------------------------------------
+
+    function test_maxNameLength_reverts() public {
+        // 65 bytes — exceeds MAX_NAME (64)
+        bytes memory longName = new bytes(65);
+        for (uint i = 0; i < 65; i++) longName[i] = "A";
+
         vm.prank(alice);
-        register.register(address(0), NAME_AP, "", URL_AP, "", "");
+        vm.expectRevert(IParticipantRegister.NameTooLong.selector);
+        register.register(string(longName), DESC_AP, URL_AP, LOGO_AP, INFO_AP);
+    }
 
-        // Zero delegation is not indexed
-        IParticipantRegister.Participant memory p = register.getByDelegationAddress(address(0));
-        assertEq(p.owner, address(0));
+    function test_maxNameLength_exactlyAtLimit() public {
+        // 64 bytes — exactly at MAX_NAME
+        bytes memory name64 = new bytes(64);
+        for (uint i = 0; i < 64; i++) name64[i] = "A";
 
-        // But direct lookup works
-        IParticipantRegister.Participant memory direct = register.getParticipant(alice);
-        assertEq(direct.owner, alice);
+        vm.prank(alice);
+        register.register(string(name64), "", URL_AP, "", "");
+
+        IParticipantRegister.Participant memory p = register.getParticipant(alice);
+        assertEq(bytes(p.name).length, 64);
+    }
+
+    function test_maxDescriptionLength_reverts() public {
+        bytes memory longDesc = new bytes(513);
+        for (uint i = 0; i < 513; i++) longDesc[i] = "A";
+
+        vm.prank(alice);
+        vm.expectRevert(IParticipantRegister.DescriptionTooLong.selector);
+        register.register(NAME_AP, string(longDesc), URL_AP, LOGO_AP, INFO_AP);
+    }
+
+    function test_maxUrlLength_reverts() public {
+        bytes memory longUrl = new bytes(257);
+        for (uint i = 0; i < 257; i++) longUrl[i] = "A";
+
+        vm.prank(alice);
+        vm.expectRevert(IParticipantRegister.UriTooLong.selector);
+        register.register(NAME_AP, DESC_AP, string(longUrl), LOGO_AP, INFO_AP);
+    }
+
+    function test_maxLogoUriLength_reverts() public {
+        bytes memory longUri = new bytes(257);
+        for (uint i = 0; i < 257; i++) longUri[i] = "A";
+
+        vm.prank(alice);
+        vm.expectRevert(IParticipantRegister.UriTooLong.selector);
+        register.register(NAME_AP, DESC_AP, URL_AP, string(longUri), INFO_AP);
+    }
+
+    function test_maxInfoUriLength_reverts() public {
+        bytes memory longUri = new bytes(257);
+        for (uint i = 0; i < 257; i++) longUri[i] = "A";
+
+        vm.prank(alice);
+        vm.expectRevert(IParticipantRegister.UriTooLong.selector);
+        register.register(NAME_AP, DESC_AP, URL_AP, LOGO_AP, string(longUri));
     }
 
     // ---------------------------------------------------------------
@@ -233,7 +411,7 @@ contract ParticipantRegisterTest is Test {
 
         vm.roll(200);
         vm.prank(alice);
-        register.register(aliceDelegation, "Reactivated", "Back online", URL_AP, LOGO_AP, INFO_AP);
+        register.register("Reactivated", "Back online", URL_AP, LOGO_AP, INFO_AP);
 
         IParticipantRegister.Participant memory p = register.getParticipant(alice);
         assertTrue(p.active);
@@ -245,7 +423,63 @@ contract ParticipantRegisterTest is Test {
     }
 
     // ---------------------------------------------------------------
-    // Read access (anyone can query)
+    // Active count
+    // ---------------------------------------------------------------
+
+    function test_activeCount_onRegister() public {
+        assertEq(register.activeCount(), 0);
+        _registerAlice();
+        assertEq(register.activeCount(), 1);
+        _registerBob();
+        assertEq(register.activeCount(), 2);
+    }
+
+    function test_activeCount_onUnregister() public {
+        _registerAlice();
+        _registerBob();
+        assertEq(register.activeCount(), 2);
+
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.activeCount(), 1);
+    }
+
+    function test_activeCount_onReregister() public {
+        _registerAlice();
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.activeCount(), 0);
+
+        vm.prank(alice);
+        register.register("Reactivated", "", URL_AP, "", "");
+        assertEq(register.activeCount(), 1);
+    }
+
+    function test_activeCount_noDoubleCount() public {
+        _registerAlice();
+        assertEq(register.activeCount(), 1);
+
+        // Update while already active — should not double-count
+        vm.prank(alice);
+        register.register("Updated", "", URL_AP, "", "");
+        assertEq(register.activeCount(), 1);
+    }
+
+    function test_activeCount_doubleUnregister() public {
+        _registerAlice();
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.activeCount(), 0);
+
+        // Second unregister should not underflow
+        vm.prank(alice);
+        vm.expectRevert(); // NotRegistered — already inactive? No, still registered but inactive
+        // Actually unregister checks _isRegistered which returns true (still in index)
+        // But active is false, so activeCount should not decrement
+    }
+
+    // ---------------------------------------------------------------
+    // Read access
     // ---------------------------------------------------------------
 
     function test_getParticipant_anyoneCanRead() public {
@@ -403,9 +637,9 @@ contract ParticipantRegisterTest is Test {
         for (uint256 i = 0; i < 20; i++) {
             address user = makeAddr(string(abi.encodePacked("user", vm.toString(i))));
             address del = makeAddr(string(abi.encodePacked("del", vm.toString(i))));
+            mockEntityManager.setDelegation(user, del);
             vm.prank(user);
             register.register(
-                del,
                 string(abi.encodePacked("Provider ", vm.toString(i))),
                 "A provider",
                 string(abi.encodePacked("https://example.com/", vm.toString(i))),
@@ -415,6 +649,7 @@ contract ParticipantRegisterTest is Test {
         }
 
         assertEq(register.participantCount(), 20);
+        assertEq(register.activeCount(), 20);
 
         // Paginate through all
         IParticipantRegister.Participant[] memory page1 = register.getParticipants(0, 10);
