@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IParticipantRegister} from "./IParticipantRegister.sol";
+import {IEntityManager} from "./IEntityManager.sol";
 
 /// @title ParticipantRegister
 /// @author African Proofs (https://proofs.africa)
@@ -11,12 +12,24 @@ import {IParticipantRegister} from "./IParticipantRegister.sol";
 /// name, description, logo, website, and a URL to a standardized JSON file. Designed as a
 /// decentralized alternative to centralized provider lists.
 ///
+/// Delegation addresses are read from Flare's EntityManager — the authoritative source for
+/// entity address relationships. This prevents delegation address hijacking.
+///
 /// Anyone can read the registry. No admin, no ownership, fully permissionless.
 ///
 /// @dev The registry is append-only: unregistering sets `active = false` but never removes
 /// the record or its index. Re-registering reactivates the entry with updated data.
 /// A reverse index maps delegation addresses to voter addresses for efficient lookup.
 contract ParticipantRegister is IParticipantRegister {
+
+    /// @dev Maximum byte lengths for string fields.
+    uint256 private constant MAX_NAME = 64;
+    uint256 private constant MAX_DESCRIPTION = 512;
+    uint256 private constant MAX_URI = 256;
+
+    /// @notice The EntityManager contract — authoritative source for delegation addresses.
+    IEntityManager public immutable entityManager;
+
     /// @dev Mapping from voter/identity address to participant metadata.
     mapping(address => Participant) private _participants;
 
@@ -26,9 +39,16 @@ contract ParticipantRegister is IParticipantRegister {
     /// @dev Ordered list of all voter/identity addresses (append-only).
     address[] private _index;
 
+    /// @dev Count of active participants.
+    uint256 private _activeCount;
+
+    /// @param _entityManager The EntityManager contract address for this network.
+    constructor(IEntityManager _entityManager) {
+        entityManager = _entityManager;
+    }
+
     /// @inheritdoc IParticipantRegister
     function register(
-        address delegation,
         string calldata name,
         string calldata description,
         string calldata url,
@@ -37,12 +57,25 @@ contract ParticipantRegister is IParticipantRegister {
     ) external {
         if (bytes(name).length == 0) revert EmptyName();
         if (bytes(url).length == 0) revert EmptyUrl();
+        if (bytes(name).length > MAX_NAME) revert NameTooLong();
+        if (bytes(description).length > MAX_DESCRIPTION) revert DescriptionTooLong();
+        if (bytes(url).length > MAX_URI) revert UriTooLong();
+        if (bytes(logoURI).length > MAX_URI) revert UriTooLong();
+        if (bytes(infoURI).length > MAX_URI) revert UriTooLong();
+
+        // Read delegation from EntityManager (authoritative source)
+        address delegation = entityManager.getDelegationAddressOf(msg.sender);
 
         if (_isRegistered(msg.sender)) {
             // Clear old delegation reverse index if delegation changed
             address oldDelegation = _participants[msg.sender].delegation;
             if (oldDelegation != delegation && oldDelegation != address(0)) {
                 delete _delegationToVoter[oldDelegation];
+            }
+
+            // Re-activate if was inactive
+            if (!_participants[msg.sender].active) {
+                _activeCount++;
             }
 
             _participants[msg.sender].delegation = delegation;
@@ -69,6 +102,7 @@ contract ParticipantRegister is IParticipantRegister {
                 registeredAt: block.number,
                 updatedAt: block.number
             });
+            _activeCount++;
         }
 
         // Update delegation reverse index
@@ -90,10 +124,33 @@ contract ParticipantRegister is IParticipantRegister {
     function unregister() external {
         if (!_isRegistered(msg.sender)) revert NotRegistered();
 
+        if (_participants[msg.sender].active) {
+            _activeCount--;
+        }
+
         _participants[msg.sender].active = false;
         _participants[msg.sender].updatedAt = block.number;
 
         emit ParticipantUnregistered(msg.sender, _participants[msg.sender].index);
+    }
+
+    /// @inheritdoc IParticipantRegister
+    function refreshDelegation(address addr) external {
+        if (!_isRegistered(addr)) revert NotRegistered();
+
+        address oldDelegation = _participants[addr].delegation;
+        address newDelegation = entityManager.getDelegationAddressOf(addr);
+
+        if (oldDelegation != newDelegation) {
+            if (oldDelegation != address(0)) {
+                delete _delegationToVoter[oldDelegation];
+            }
+            _participants[addr].delegation = newDelegation;
+            if (newDelegation != address(0)) {
+                _delegationToVoter[newDelegation] = addr;
+            }
+            _participants[addr].updatedAt = block.number;
+        }
     }
 
     /// @inheritdoc IParticipantRegister
@@ -115,16 +172,11 @@ contract ParticipantRegister is IParticipantRegister {
     /// @inheritdoc IParticipantRegister
     function getActiveParticipants() external view returns (address[] memory) {
         // First pass: count active
-        uint256 activeCount = 0;
         uint256 len = _index.length;
-        for (uint256 i = 0; i < len; i++) {
-            if (_participants[_index[i]].active) {
-                activeCount++;
-            }
-        }
+        uint256 count = _activeCount;
 
         // Second pass: collect active addresses
-        address[] memory result = new address[](activeCount);
+        address[] memory result = new address[](count);
         uint256 j = 0;
         for (uint256 i = 0; i < len; i++) {
             if (_participants[_index[i]].active) {
@@ -166,6 +218,11 @@ contract ParticipantRegister is IParticipantRegister {
     /// @inheritdoc IParticipantRegister
     function participantCount() external view returns (uint256) {
         return _index.length;
+    }
+
+    /// @inheritdoc IParticipantRegister
+    function activeCount() external view returns (uint256) {
+        return _activeCount;
     }
 
     /// @dev Check if an address is in the registry. Uses the index array for O(1) lookup.
