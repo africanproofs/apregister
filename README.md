@@ -1,4 +1,4 @@
-# Flare Participant Register
+# apregister — Flare Participant Register
 
 A permissionless on-chain registry for Flare and Songbird infrastructure participants. Data providers, validators, and FDC operators register with metadata (name, description, logo, website) and a URL to a standardized JSON file describing their offerings.
 
