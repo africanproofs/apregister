@@ -188,6 +188,7 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 | Network | Address | Chain ID |
 |---------|---------|----------|
+| Coston2 (testnet) | `0x3f2230ff1ed8c16809e6c86af5bf42ed25268c97` | 114 |
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
 
@@ -199,12 +200,13 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | [02-competitive-positioning.md](research/02-competitive-positioning.md) | TowoLabs incumbent analysis, why AP register wins, competitive response risk | Current |
 | [03-security-analysis.md](research/03-security-analysis.md) | Minimised attack surface review, griefing vectors, recommended fixes | Partially stale — some findings relate to removed features |
 | [04-adoption-strategy.md](research/04-adoption-strategy.md) | Target providers, outreach timeline, messaging by audience, success metrics | Current |
-| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes, tests, testnet, mainnet), resource plan, timeline | Partially stale — references removed features |
+| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes, tests, testnet, mainnet), resource plan, timeline | Updated — phases 1-3 done, phase 4 (mainnet) next |
 
 ## Related Projects
 
 | Project | Relationship |
 |---|---|
+| **apregister-web** | Frontend portal at register.proofs.africa — registration form, directory, profiles |
 | **apdao** | Bond Pool contract. Register demonstrates AP's smart contract capability before asking community to trust the Bond Pool |
 | **apsocial** | Register deployment is apsocial content. Growth milestones are posts |
 | **proofs.africa** | Integration guide published on proofs.africa. Register listed as AP project |
