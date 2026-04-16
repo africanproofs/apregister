@@ -1,0 +1,28 @@
+image: ghcr.io/foundry-rs/foundry:latest
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - forge build --sizes
+  artifacts:
+    paths:
+      - out/
+
+test:
+  stage: test
+  script:
+    - forge test -vvv
+  dependencies:
+    - build
+
+gas-report:
+  stage: test
+  script:
+    - forge test --gas-report
+  dependencies:
+    - build
+  allow_failure: true

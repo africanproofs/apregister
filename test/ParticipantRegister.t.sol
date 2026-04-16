@@ -8,9 +8,6 @@ import {IParticipantRegister} from "../src/IParticipantRegister.sol";
 contract ParticipantRegisterTest is Test {
     ParticipantRegister private register;
 
-    // Re-declare enum for test convenience
-    using {_t} for uint8;
-
     event ParticipantRegistered(
         address indexed owner,
         IParticipantRegister.ParticipantType indexed participantType,
@@ -330,14 +327,14 @@ contract ParticipantRegisterTest is Test {
         assertEq(register.activeCount(), 1);
     }
 
-    function test_activeCount_doubleUnregister() public {
+    function test_activeCount_doubleUnregister_reverts() public {
         _registerAlice();
         vm.prank(alice);
         register.unregister();
 
         vm.prank(alice);
+        vm.expectRevert(IParticipantRegister.NotActive.selector);
         register.unregister();
-        assertEq(register.activeCount(), 0);
     }
 
     // ---------------------------------------------------------------
@@ -500,8 +497,135 @@ contract ParticipantRegisterTest is Test {
         address[] memory defi = register.getParticipantsByType(DEFI);
         assertEq(defi.length, 5);
     }
-}
 
-function _t(uint8) pure returns (IParticipantRegister.ParticipantType) {
-    return IParticipantRegister.ParticipantType.Provider;
+    // ---------------------------------------------------------------
+    // Fuzz tests
+    // ---------------------------------------------------------------
+
+    function testFuzz_register_uriLength(uint8 len) public {
+        vm.assume(len > 0);
+        // Cap at 256 (MAX_URI)
+        uint256 uriLen = uint256(len);
+        bytes memory uri = new bytes(uriLen);
+        for (uint256 i = 0; i < uriLen; i++) uri[i] = "A";
+
+        vm.prank(alice);
+        register.register(PROVIDER, string(uri));
+        assertEq(bytes(register.getParticipant(alice).infoURI).length, uriLen);
+    }
+
+    function testFuzz_register_allTypes(uint8 rawType) public {
+        // ParticipantType has 20 values (0-19)
+        vm.assume(rawType < 20);
+        IParticipantRegister.ParticipantType t = IParticipantRegister.ParticipantType(rawType);
+
+        vm.prank(alice);
+        register.register(t, INFO_AP);
+
+        assertTrue(register.getParticipant(alice).participantType == t);
+        assertEq(register.typeCount(t), 1);
+    }
+
+    function testFuzz_getParticipants_pagination(uint8 numParticipants, uint8 offset, uint8 limit) public {
+        uint256 n = bound(uint256(numParticipants), 1, 20);
+        uint256 off = uint256(offset);
+        uint256 lim = bound(uint256(limit), 1, 50);
+
+        // Register n participants
+        for (uint256 i = 0; i < n; i++) {
+            address user = makeAddr(string(abi.encodePacked("fuzzUser", vm.toString(i))));
+            vm.prank(user);
+            register.register(PROVIDER, string(abi.encodePacked("https://example.com/", vm.toString(i))));
+        }
+
+        if (off >= n) {
+            vm.expectRevert(IParticipantRegister.OffsetOutOfBounds.selector);
+            register.getParticipants(off, lim);
+        } else {
+            IParticipantRegister.Participant[] memory page = register.getParticipants(off, lim);
+            uint256 expected = lim < (n - off) ? lim : (n - off);
+            assertEq(page.length, expected);
+        }
+    }
+
+    function testFuzz_register_unregister_reregister(uint8 rawType1, uint8 rawType2) public {
+        vm.assume(rawType1 < 20);
+        vm.assume(rawType2 < 20);
+        IParticipantRegister.ParticipantType t1 = IParticipantRegister.ParticipantType(rawType1);
+        IParticipantRegister.ParticipantType t2 = IParticipantRegister.ParticipantType(rawType2);
+
+        // Register with type 1
+        vm.prank(alice);
+        register.register(t1, INFO_AP);
+        assertEq(register.activeCount(), 1);
+        assertEq(register.typeCount(t1), 1);
+
+        // Unregister
+        vm.prank(alice);
+        register.unregister();
+        assertEq(register.activeCount(), 0);
+        assertEq(register.typeCount(t1), 0);
+
+        // Re-register with type 2
+        vm.prank(alice);
+        register.register(t2, INFO_BOB);
+        assertEq(register.activeCount(), 1);
+        assertEq(register.typeCount(t2), 1);
+        if (t1 != t2) {
+            assertEq(register.typeCount(t1), 0);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Invariant: activeCount consistency
+    // ---------------------------------------------------------------
+
+    function test_invariant_activeCountConsistent() public {
+        // Register 5, unregister 2, re-register 1
+        for (uint256 i = 0; i < 5; i++) {
+            address user = makeAddr(string(abi.encodePacked("inv", vm.toString(i))));
+            vm.prank(user);
+            register.register(PROVIDER, string(abi.encodePacked("https://example.com/", vm.toString(i))));
+        }
+        assertEq(register.activeCount(), 5);
+
+        // Unregister first two
+        vm.prank(makeAddr("inv0"));
+        register.unregister();
+        vm.prank(makeAddr("inv1"));
+        register.unregister();
+        assertEq(register.activeCount(), 3);
+
+        // Re-register first one
+        vm.prank(makeAddr("inv0"));
+        register.register(DEFI, "https://example.com/reactivated");
+        assertEq(register.activeCount(), 4);
+
+        // Verify by counting active participants
+        address[] memory active = register.getActiveParticipants();
+        assertEq(active.length, register.activeCount());
+
+        // Verify type counts
+        assertEq(register.typeCount(PROVIDER), 3); // inv2, inv3, inv4
+        assertEq(register.typeCount(DEFI), 1);     // inv0 re-registered as DeFi
+
+        address[] memory providers = register.getParticipantsByType(PROVIDER);
+        assertEq(providers.length, register.typeCount(PROVIDER));
+
+        address[] memory defi = register.getParticipantsByType(DEFI);
+        assertEq(defi.length, register.typeCount(DEFI));
+    }
+
+    function test_invariant_indexNeverShrinks() public {
+        _registerAlice();
+        _registerBob();
+        uint256 countBefore = register.participantCount();
+
+        vm.prank(alice);
+        register.unregister();
+
+        // Index never shrinks even after unregister
+        assertEq(register.participantCount(), countBefore);
+        assertEq(register.getAllParticipants().length, countBefore);
+    }
 }

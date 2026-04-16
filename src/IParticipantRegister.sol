@@ -70,6 +70,9 @@ interface IParticipantRegister {
     /// @notice The caller is not a registered participant.
     error NotRegistered();
 
+    /// @notice The caller's registration is already inactive.
+    error NotActive();
+
     /// @notice The offset exceeds the participant count.
     error OffsetOutOfBounds();
 

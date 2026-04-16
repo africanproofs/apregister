@@ -74,10 +74,9 @@ contract ParticipantRegister is IParticipantRegister {
     /// @inheritdoc IParticipantRegister
     function unregister() external {
         if (!_isRegistered(msg.sender)) revert NotRegistered();
-        if (_participants[msg.sender].active) {
-            _activeCount--;
-            _typeCounts[_participants[msg.sender].participantType]--;
-        }
+        if (!_participants[msg.sender].active) revert NotActive();
+        _activeCount--;
+        _typeCounts[_participants[msg.sender].participantType]--;
         _participants[msg.sender].active = false;
         _participants[msg.sender].updatedAt = block.number;
         emit ParticipantUnregistered(msg.sender, _participants[msg.sender].index);
