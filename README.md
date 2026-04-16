@@ -1,6 +1,6 @@
 # apregister — Flare Participant Register
 
-A permissionless on-chain registry for Flare and Songbird infrastructure participants. Data providers, validators, and FDC operators register with metadata (name, description, logo, website) and a URL to a standardized JSON file describing their offerings.
+A permissionless on-chain registry for Flare and Songbird ecosystem participants. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
 
@@ -8,7 +8,7 @@ A permissionless on-chain registry for Flare and Songbird infrastructure partici
 
 The current canonical source for FTSO provider metadata is a centralized GitHub repo maintained by a single entity (TowoLabs). Every ecosystem tool (flaremetrics.io, flare.builders, Bifrost Wallet) depends on it. Providers who don't submit a PR are displayed as raw hex addresses. The maintainer is also a competing provider.
 
-This contract moves provider identity on-chain, where it belongs. Any participant can register and update their metadata at any time without approval from anyone.
+This contract moves participant identity on-chain, where it belongs. Any entity can register and update their metadata at any time without approval from anyone.
 
 ## Contract
 
@@ -16,46 +16,60 @@ This contract moves provider identity on-chain, where it belongs. Any participan
 
 | Function | Access | Description |
 |----------|--------|-------------|
-| `register(delegation, name, description, url, logoURI, infoURI)` | Participant | Register or update. Sets `active = true`. |
-| `unregister()` | Participant | Deactivate. Data retained, marked inactive. |
+| `register(ParticipantType, infoURI)` | `msg.sender` | Register or update. Sets `active = true`. Type is on-chain filterable; rich metadata lives at `infoURI`. |
+| `unregister()` | `msg.sender` | Deactivate. Data retained, marked inactive. |
 
 ### Read Functions
 
 | Function | Description |
 |----------|-------------|
-| `getParticipant(address)` | Look up by voter/identity address. |
-| `getByDelegationAddress(address)` | Look up by delegation address. |
+| `getParticipant(address)` | Look up by entity address. Returns full `Participant` struct. |
 | `getAllParticipants()` | All registered addresses (active + inactive). |
-| `getActiveParticipants()` | Only active addresses. |
-| `getParticipants(offset, limit)` | Paginated retrieval of full metadata. |
-| `isRegistered(address)` | Check if an address has ever registered. |
-| `participantCount()` | Total registered count. |
+| `getActiveParticipants()` | Only active addresses. Off-chain use only (O(n) iteration). |
+| `getParticipantsByType(ParticipantType)` | Active participants filtered by type. Off-chain use only (O(n) iteration). |
+| `getParticipants(offset, limit)` | Paginated retrieval of full `Participant` structs. Safe for on-chain consumers. |
+| `isRegistered(address)` | Check if an address has ever registered (active or inactive). |
+| `participantCount()` | Total registered count (active + inactive). |
+| `activeCount()` | Active participant count. |
+| `typeCount(ParticipantType)` | Active count for a specific type. |
+
+### Participant Types
+
+| Value | Type | Description |
+|-------|------|-------------|
+| 0 | `Provider` | FTSO data providers, validators, FDC operators |
+| 1 | `DeFi` | Lending, DEX, yield, staking protocols |
+| 2 | `Wallet` | Wallet applications |
+| 3 | `Tool` | Explorers, analytics, dev tools |
+| 4 | `FAssetsAgent` | FAssets minting agents |
+| 5 | `Exchange` | CEX/DEX with Flare listings |
+| 6 | `App` | Games, NFT projects, general dApps |
+| 7-19 | `Reserved` | Future use — assign meaning via off-chain convention without redeploying |
 
 ### Events
 
-- `ParticipantRegistered(owner, delegation, index, name, url, logoURI)`
-- `ParticipantUnregistered(owner, index)`
+- `ParticipantRegistered(address indexed owner, ParticipantType indexed participantType, uint256 index, string infoURI)`
+- `ParticipantUnregistered(address indexed owner, uint256 index)`
 
-### On-Chain Metadata
+### On-Chain Data
 
 Each participant stores:
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `delegation` | No | Delegation address (for toolmaker reverse lookup) |
-| `name` | Yes | Display name (max 32 chars recommended) |
-| `description` | No | Short description (max 350 chars recommended) |
-| `url` | Yes | Website URL |
-| `logoURI` | No | Direct URL to logo image (128-256px PNG) |
-| `infoURI` | No | URL to full standardized JSON metadata file |
-| `registeredAt` | Auto | Block number of first registration |
-| `updatedAt` | Auto | Block number of last update |
+| Field | Description |
+|-------|-------------|
+| `owner` | Entity address (`msg.sender` on registration) |
+| `participantType` | On-chain filterable type (Provider, DeFi, Wallet, etc.) |
+| `infoURI` | URL to JSON-LD metadata file (max 256 bytes) |
+| `active` | Whether the registration is active |
+| `index` | Position in the participant index |
+| `registeredAt` | Block number of first registration |
+| `updatedAt` | Block number of last update |
 
 The registry is append-only: unregistering sets `active = false` but never removes the record. Re-registering reactivates the entry with updated data.
 
 ## participant.json Schema
 
-The contract stores only a pointer (`infoURI`). All metadata lives in the JSON-LD file at that URL.
+The contract stores only a type and a pointer (`infoURI`). All rich metadata lives in the JSON-LD file at that URL.
 
 **Design principle**: No duplication. Addresses, nodes, and keys are on-chain in EntityManager. participant.json contains only what ISN'T on-chain — name, logo, contact, services, infrastructure location.
 
@@ -109,32 +123,40 @@ The `@context` makes the file self-describing. Any JSON-LD parser — including 
 ### Registration
 
 1. Host your `participant.json` at a public URL
-2. Call `register("https://yoursite.com/participant.json")` with your entity address
-3. Update anytime by calling `register()` again with a new URI
+2. Call `register(ParticipantType.Provider, "https://yoursite.com/participant.json")` with your entity address
+3. Update anytime by calling `register()` again with a new type or URI
 
 ## For Toolmakers
 
 The contract is designed for easy integration by ecosystem dashboards and wallets.
 
-**Bulk fetch** all providers with pagination:
+**Bulk fetch** all participants with pagination:
 ```solidity
 // Get first 50 participants
 Participant[] memory page = register.getParticipants(0, 50);
+// Each has: owner, participantType, infoURI, active, index, registeredAt, updatedAt
 ```
 
-**Delegation lookup** (how wallets find provider metadata):
+**Filter by type** (FTSO providers only):
 ```solidity
-// User delegates to 0x1234... — look up who that is
-Participant memory p = register.getByDelegationAddress(delegationAddress);
-// p.name, p.logoURI, p.description are ready to display
+// Get all active providers
+address[] memory providers = register.getParticipantsByType(ParticipantType.Provider);
+// Fetch each provider's participant.json from their infoURI for name, logo, etc.
 ```
 
-**Active-only filtering**:
+**Active-only listing**:
 ```solidity
 address[] memory active = register.getActiveParticipants();
 ```
 
-**Events for indexers** — `ParticipantRegistered` emits indexed `owner` and `delegation` for efficient subgraph queries.
+**Type counts** (for dashboards):
+```solidity
+uint256 providers = register.typeCount(ParticipantType.Provider);
+uint256 defi = register.typeCount(ParticipantType.DeFi);
+uint256 total = register.activeCount();
+```
+
+**Events for indexers** — `ParticipantRegistered` emits indexed `owner` and `participantType` for efficient subgraph queries.
 
 ## Development
 
@@ -171,13 +193,13 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 ## Research & Planning
 
-| Document | Description |
-|---|---|
-| [01-architecture.md](research/01-architecture.md) | Contract architecture, storage design, relationship to EntityManager |
-| [02-competitive-positioning.md](research/02-competitive-positioning.md) | TowoLabs incumbent analysis, why AP register wins, competitive response risk |
-| [03-security-analysis.md](research/03-security-analysis.md) | Minimised attack surface review, 5 griefing vectors, recommended fixes |
-| [04-adoption-strategy.md](research/04-adoption-strategy.md) | Target providers, outreach timeline, messaging by audience, success metrics |
-| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes → tests → testnet → mainnet), resource plan, timeline |
+| Document | Description | Status |
+|---|---|---|
+| [01-architecture.md](research/01-architecture.md) | Contract architecture, storage design, relationship to EntityManager | Partially stale — describes pre-simplification design |
+| [02-competitive-positioning.md](research/02-competitive-positioning.md) | TowoLabs incumbent analysis, why AP register wins, competitive response risk | Current |
+| [03-security-analysis.md](research/03-security-analysis.md) | Minimised attack surface review, griefing vectors, recommended fixes | Partially stale — some findings relate to removed features |
+| [04-adoption-strategy.md](research/04-adoption-strategy.md) | Target providers, outreach timeline, messaging by audience, success metrics | Current |
+| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes, tests, testnet, mainnet), resource plan, timeline | Partially stale — references removed features |
 
 ## Related Projects
 
