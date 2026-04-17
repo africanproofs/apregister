@@ -34,7 +34,25 @@
       "type": "string",
       "maxLength": 256,
       "format": "uri",
-      "description": "Direct URL to a square logo image (PNG, min 128px)."
+      "description": "Direct URL to the primary logo image. Universal fallback — consumers use this when no theme-specific or square variant is available."
+    },
+    "logoLight": {
+      "type": "string",
+      "maxLength": 256,
+      "format": "uri",
+      "description": "Optional. Logo variant for light backgrounds (e.g. dark mark/text on transparent). Consumers pick this over `logo` when rendering on a light surface."
+    },
+    "logoDark": {
+      "type": "string",
+      "maxLength": 256,
+      "format": "uri",
+      "description": "Optional. Logo variant for dark backgrounds (e.g. light mark/text on transparent). Consumers pick this over `logo` when rendering on a dark surface."
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 256,
+      "format": "uri",
+      "description": "Optional. Square mark / icon (recommended 512x512, symbol only — no wordmark). Used for avatars, directory tiles, favicons. Falls back to `logo` if absent."
     },
     "flare:social": {
       "type": "object",
