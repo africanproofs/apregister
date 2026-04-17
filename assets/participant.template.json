@@ -8,7 +8,11 @@
   "name": "African Proofs",
   "description": "Flare infrastructure provider — ML-powered oracle, full FDC verification, dual-chain operation on Flare and Songbird",
   "url": "https://proofs.africa",
+
   "logo": "https://proofs.africa/logo-256.png",
+  "logoLight": "https://proofs.africa/logo-light.svg",
+  "logoDark": "https://proofs.africa/logo-dark.svg",
+  "icon": "https://proofs.africa/icon-512.png",
 
   "flare:social": {
     "twitter": "africanproofs",
