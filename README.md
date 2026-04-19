@@ -4,6 +4,8 @@ A permissionless on-chain registry for Flare and Songbird ecosystem participants
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
 
+> **Power-user path:** skip the portal and call the contract directly — one `cast send`, one JSON file you host yourself. See [`docs/register-direct.md`](docs/register-direct.md).
+
 ### Why?
 
 The current canonical source for FTSO provider metadata is a centralized GitHub repo maintained by a single entity (TowoLabs). Every ecosystem tool (flaremetrics.io, flare.builders, Bifrost Wallet) depends on it. Providers who don't submit a PR are displayed as raw hex addresses. The maintainer is also a competing provider.
@@ -188,7 +190,7 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 | Network | Address | Chain ID |
 |---------|---------|----------|
-| Coston2 (testnet) | `0x3f2230ff1ed8c16809e6c86af5bf42ed25268c97` | 114 |
+| Coston2 (testnet) | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` | 114 |
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
 
