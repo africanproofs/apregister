@@ -6,17 +6,19 @@ No admins, no PRs, no review process. The contract takes anyone's `(participantT
 
 ## What you'll need
 
-- A wallet with FLR (or C2FLR for testnet). Registration costs ~$0.01.
+- A wallet with C2FLR for testnet (free from the [Coston2 faucet](https://faucet.flare.network/coston2)) — registration costs ~$0.01 on mainnet.
 - One JSON file you can host at a public URL.
 - 5 minutes.
 
 ## Pick a path
 
-**[Register via the portal](https://register.proofs.africa/new)** — most participants. Connect your wallet, fill the form, sign. Autofills from existing FTSO catalog data when available.
+**[Register via the portal](https://registerc2.proofs.africa/new)** — most participants. Connect your wallet, fill the form, sign. Autofills from existing FTSO catalog data when available.
 
 **[Register via CLI](./register.md)** — power users, scripted deploys. One `cast send`.
 
 Both paths target the same contract.
+
+> **Currently on Coston2 testnet.** Flare mainnet deployment is pending. The portal at `registerc2.proofs.africa` lets you try the full flow risk-free. The `register.proofs.africa` domain will replace it at mainnet flip.
 
 ## Networks
 
