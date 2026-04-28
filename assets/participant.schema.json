@@ -36,23 +36,30 @@
       "format": "uri",
       "description": "Direct URL to the primary logo image. Universal fallback — consumers use this when no theme-specific or square variant is available."
     },
-    "logoLight": {
-      "type": "string",
-      "maxLength": 256,
-      "format": "uri",
-      "description": "Optional. Logo variant for light backgrounds (e.g. dark mark/text on transparent). Consumers pick this over `logo` when rendering on a light surface."
-    },
-    "logoDark": {
-      "type": "string",
-      "maxLength": 256,
-      "format": "uri",
-      "description": "Optional. Logo variant for dark backgrounds (e.g. light mark/text on transparent). Consumers pick this over `logo` when rendering on a dark surface."
-    },
-    "icon": {
-      "type": "string",
-      "maxLength": 256,
-      "format": "uri",
-      "description": "Optional. Square mark / icon (recommended 512x512, symbol only — no wordmark). Used for avatars, directory tiles, favicons. Falls back to `logo` if absent."
+    "flare:brand": {
+      "type": "object",
+      "description": "Theme-aware and shape-specific logo variants. All optional. Consumers fall back to top-level `logo` if absent.",
+      "properties": {
+        "light": {
+          "type": "string",
+          "maxLength": 256,
+          "format": "uri",
+          "description": "Logo variant for light backgrounds (dark mark/text on transparent)."
+        },
+        "dark": {
+          "type": "string",
+          "maxLength": 256,
+          "format": "uri",
+          "description": "Logo variant for dark backgrounds (light mark/text on transparent)."
+        },
+        "icon": {
+          "type": "string",
+          "maxLength": 256,
+          "format": "uri",
+          "description": "Square mark / icon (recommended 512x512, symbol only). Used for avatars, directory tiles, favicons."
+        }
+      },
+      "additionalProperties": false
     },
     "flare:social": {
       "type": "object",
