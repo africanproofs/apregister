@@ -4,7 +4,7 @@ A permissionless on-chain registry for Flare and Songbird ecosystem participants
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
 
-> **Power-user path:** skip the portal and call the contract directly — one `cast send`, one JSON file you host yourself. See [`docs/register-direct.md`](docs/register-direct.md).
+> **Power-user path:** skip the portal and call the contract directly — one `cast send`, one JSON file you host yourself. See [`docs/register.md`](docs/register.md).
 
 ## Contract
 
