@@ -184,7 +184,7 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 | Network | Address | Chain ID |
 |---------|---------|----------|
-| Coston2 (testnet) | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` | 114 |
+| Coston2 (testnet) | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` | 114 |
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
 

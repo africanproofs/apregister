@@ -26,7 +26,7 @@ Both paths target the same contract.
 |---|---|---|
 | Flare | 14 | TBD |
 | Songbird | 19 | TBD |
-| Coston2 (testnet) | 114 | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` |
+| Coston2 (testnet) | 114 | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` |
 
 ## Then what
 
