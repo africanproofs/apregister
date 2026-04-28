@@ -15,3 +15,7 @@ broadcast/
 
 # Node
 node_modules/
+
+# Private
+CLAUDE.md
+research/
