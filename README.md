@@ -188,6 +188,15 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
 
+## Integrate
+
+Building a directory, wallet, or indexer on top of this registry?
+
+- ABI: [`abi/ParticipantRegister.abi.json`](abi/ParticipantRegister.abi.json)
+- TypeScript types for `participant.json`: [`types/participant.d.ts`](types/participant.d.ts)
+- Integration guide: [`docs/integrate.md`](docs/integrate.md)
+- Live portal: [registerc2.proofs.africa](https://registerc2.proofs.africa)
+
 ## Security
 
 This contract has been **internally reviewed** by African Proofs' automated audit tooling — 48 unit + fuzz tests, zero Critical/High/Medium findings, no admin surface, no funds held, no external calls. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
