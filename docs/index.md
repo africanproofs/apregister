@@ -1,39 +1,31 @@
-# ParticipantRegister — docs
+# Overview
 
-Integration-oriented docs for the on-chain participant registry. For the contract source + deployment + audit notes, see the [`apregister` README](../README.md) on GitLab.
+A permissionless on-chain directory of Flare network participants. Register your address, point at a JSON file with your name and metadata, and downstream tools — explorers, dashboards, wallets, indexers — discover you automatically.
 
-Everything here is rendered two ways:
+No admins, no PRs, no review process. The contract takes anyone's `(participantType, infoURI)` from `msg.sender`.
 
-1. **Native GitLab rendering** — browse the repo, click a `.md`, you get markdown-rendered pages with the contract file tree right there.
-2. **Web client** — `register.proofs.africa/docs` pulls the same files via the GitLab API and renders them with the portal's styling and navigation. The markdown files in this directory are the source of truth; the portal is a reader.
+## What you'll need
 
-A single edit-and-push to `main` in this repo propagates to both views automatically (ISR cache on the portal refreshes within ~10 minutes).
+- A wallet with FLR (or C2FLR for testnet). Registration costs ~$0.01.
+- One JSON file you can host at a public URL.
+- 5 minutes.
 
-## What's here
+## Pick a path
 
-- [**Register directly**](./register-direct.md) — power-user path. One `cast send`, one JSON file you host yourself. No portal, no hand-holding. Covers contract addresses, participant types, `participant.json` schema + hosting, CORS gotchas, read/write recipes via `cast` and viem, gas costs, and why the contract is deliberately permissionless.
+**[Register via the portal](https://register.proofs.africa/new)** — most participants. Connect your wallet, fill the form, sign. Autofills from existing FTSO catalog data when available.
 
-## Coming soon
+**[Register via CLI](./register.md)** — power users, scripted deploys. One `cast send`.
 
-- **Integration recipe for indexers** — event topics, pagination patterns for on-chain consumers.
-- **Hosting quickstart** — zero-to-served `participant.json` on GitHub Pages / IPFS / Arweave in under 5 minutes.
-- **Flare mainnet deployment notes** — contract address, gas posture, CREATE2 salt decisions.
+Both paths target the same contract.
 
-## Contributing
+## Networks
 
-Every file in this directory is picked up automatically by the portal (via a small manifest in the frontend — one line to add a new slug). Drop a new `.md`, open an MR, and once merged it's live at `register.proofs.africa/docs/<basename>` within the ISR window.
+| Network | Chain ID | Contract |
+|---|---|---|
+| Flare | 14 | TBD |
+| Songbird | 19 | TBD |
+| Coston2 (testnet) | 114 | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` |
 
-Conventions:
+## Then what
 
-- One H1 per file — it becomes the page title.
-- Relative links to source files (`../src/...`) auto-rewrite to GitLab blob URLs on the portal.
-- Cross-doc links (`./other-doc.md`) rewrite to `/docs/other-doc` on the portal and stay as GitLab-native links on the repo.
-- External URLs pass through unchanged.
-
-## Related
-
-- Contract interface: [`../src/IParticipantRegister.sol`](../src/IParticipantRegister.sol)
-- Implementation: [`../src/ParticipantRegister.sol`](../src/ParticipantRegister.sol)
-- JSON-LD template: [`../assets/participant.template.json`](../assets/participant.template.json)
-- JSON schema: [`../assets/participant.schema.json`](../assets/participant.schema.json)
-- Audit notes: repo `CLAUDE.md` § Audit Status
+Your registration is live the moment the transaction confirms. Edit your JSON file to update metadata — no second transaction needed. See [Manage your listing](./manage.md) for changes and deactivation.
