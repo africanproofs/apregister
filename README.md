@@ -6,12 +6,6 @@ A permissionless on-chain registry for Flare and Songbird ecosystem participants
 
 > **Power-user path:** skip the portal and call the contract directly — one `cast send`, one JSON file you host yourself. See [`docs/register-direct.md`](docs/register-direct.md).
 
-### Why?
-
-The current canonical source for FTSO provider metadata is a centralized GitHub repo maintained by a single entity (TowoLabs). Every ecosystem tool (flaremetrics.io, flare.builders, Bifrost Wallet) depends on it. Providers who don't submit a PR are displayed as raw hex addresses. The maintainer is also a competing provider.
-
-This contract moves participant identity on-chain, where it belongs. Any entity can register and update their metadata at any time without approval from anyone.
-
 ## Contract
 
 ### Write Functions
@@ -193,27 +187,6 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | Coston2 (testnet) | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` | 114 |
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
-
-## Research & Planning
-
-| Document | Description | Status |
-|---|---|---|
-| [01-architecture.md](research/01-architecture.md) | Contract architecture, storage design, relationship to EntityManager | Partially stale — describes pre-simplification design |
-| [02-competitive-positioning.md](research/02-competitive-positioning.md) | TowoLabs incumbent analysis, why AP register wins, competitive response risk | Current |
-| [03-security-analysis.md](research/03-security-analysis.md) | Minimised attack surface review, griefing vectors, recommended fixes | Partially stale — some findings relate to removed features |
-| [04-adoption-strategy.md](research/04-adoption-strategy.md) | Target providers, outreach timeline, messaging by audience, success metrics | Current |
-| [05-launch-plan.md](research/05-launch-plan.md) | Technical plan (security fixes, tests, testnet, mainnet), resource plan, timeline | Updated — phases 1-3 done, phase 4 (mainnet) next |
-
-## Related Projects
-
-| Project | Relationship |
-|---|---|
-| **apregister-web** | Frontend portal at register.proofs.africa — registration form, directory, profiles |
-| **apdao** | Bond Pool contract. Register demonstrates AP's smart contract capability before asking community to trust the Bond Pool |
-| **apsocial** | Register deployment is apsocial content. Growth milestones are posts |
-| **proofs.africa** | Integration guide published on proofs.africa. Register listed as AP project |
-| **flaremetrics.io** | Target integration — Tim Rowley reads from contract instead of TowoLabs JSON |
-| **flare.builders** | Target integration — NeilD reads from contract instead of TowoLabs JSON |
 
 ## License
 
