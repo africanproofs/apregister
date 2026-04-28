@@ -10,9 +10,11 @@
   "url": "https://proofs.africa",
 
   "logo": "https://proofs.africa/logo-256.png",
-  "logoLight": "https://proofs.africa/logo-light.svg",
-  "logoDark": "https://proofs.africa/logo-dark.svg",
-  "icon": "https://proofs.africa/icon-512.png",
+  "flare:brand": {
+    "light": "https://proofs.africa/logo-light.svg",
+    "dark": "https://proofs.africa/logo-dark.svg",
+    "icon": "https://proofs.africa/icon-512.png"
+  },
 
   "flare:social": {
     "twitter": "africanproofs",
