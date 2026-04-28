@@ -1,4 +1,4 @@
-# apregister — Flare Participant Register
+# apregister — Flare Participant Registry
 
 A permissionless on-chain registry for Flare and Songbird ecosystem participants. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
 
@@ -187,6 +187,19 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | Coston2 (testnet) | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` | 114 |
 | Songbird | TBD | 19 |
 | Flare | TBD | 14 |
+
+## Security
+
+This contract has been **internally reviewed** by African Proofs' automated audit tooling — 48 unit + fuzz tests, zero Critical/High/Medium findings, no admin surface, no funds held, no external calls. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
+
+**Trust signals:**
+
+- 48 tests passing (`forge test`)
+- No admin, no owner, no upgradeability
+- Bytecode 5,463 bytes (well under EIP-170 24KB limit)
+- Open-source, MIT-licensed
+
+**Security disclosure:** report vulnerabilities to `security@proofs.africa`. Please do not open public issues for security-sensitive findings.
 
 ## License
 
