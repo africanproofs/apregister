@@ -11,7 +11,7 @@ No transaction needed unless you change the type or the URL itself.
 Re-call `register()` with the new values. The contract updates in place — same row, same `registeredAt`, bumped `updatedAt`.
 
 ```bash
-cast send 0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE \
+cast send 0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12 \
   "register(uint8,string)" <new_type> "<new_infoURI>" \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
@@ -22,7 +22,7 @@ Or use the portal: visit `/new` while connected from your registered address and
 ## Deactivate
 
 ```bash
-cast send 0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE \
+cast send 0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12 \
   "unregister()" \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY

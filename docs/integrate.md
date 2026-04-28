@@ -6,7 +6,7 @@ Build a directory, indexer, or wallet integration on top of `ParticipantRegister
 
 | Network | Chain ID | Address |
 |---|---|---|
-| Coston2 (testnet) | 114 | `0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE` |
+| Coston2 (testnet) | 114 | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` |
 | Flare | 14 | TBD |
 | Songbird | 19 | TBD |
 
@@ -33,7 +33,7 @@ const abi = parseAbi([
   "function getParticipantsByType(uint8) view returns (address[])",
 ]);
 
-const REG = "0xfD4C0144f4F5E52e55b4E828aC904842C31b3BDE";
+const REG = "0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12";
 const all = await client.readContract({ address: REG, abi, functionName: "getActiveParticipants" });
 ```
 
@@ -69,4 +69,4 @@ CORS on the participant's `infoURI` is the most common integration failure. The 
 
 ## Test-support contracts (Coston2 only)
 
-`MockIdentityRegistry` (`0xd1f8a7c3c7009a1d237d69deb87ad76d0a8939fb`) is an admin-managed allowlist that mirrors the EntityManager's "is this an FSP identity?" semantics on testnet, where the real EntityManager isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `EntityManager` via `FlareContractRegistry`.
+`MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) is an admin-managed allowlist that mirrors the EntityManager's "is this an FSP identity?" semantics on testnet, where the real EntityManager isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `EntityManager` via `FlareContractRegistry`.
