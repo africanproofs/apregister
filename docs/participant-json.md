@@ -81,3 +81,52 @@ Fix:
 - **HTTPS only** — `http://` URLs fail the browser's mixed-content policy
 - **Valid JSON** — HTML error pages served with HTTP 200 break consumers
 - **URL ≤ 256 bytes** — enforced by the contract
+
+## Brand kit (optional)
+
+Drop image files alongside your `participant.json` and the registry portal picks them up automatically — no extra JSON fields needed.
+
+### Convention paths
+
+| File | Used for |
+|---|---|
+| `brand/icon.svg` or `brand/icon.png` | Square icon / mark (directory cards, profile hero) |
+| `brand/logo-light.svg` or `brand/logo-light.png` | Logo for light-background surfaces |
+| `brand/logo-dark.svg` or `brand/logo-dark.png` | Logo for dark-background surfaces |
+
+SVG is tried before PNG. If neither variant exists, the portal falls through to explicit JSON URLs, then TowoLabs (Providers only), then an initials tile.
+
+### Supported hosts
+
+Folder-level access is required for the convention to work:
+
+| Supported | Not supported |
+|---|---|
+| Own website / server | Arweave (content-addressed, no folders) |
+| GitHub Pages / GitHub raw | Single-file IPFS pins |
+| GitLab Pages / GitLab raw | GitHub Gists |
+| Amazon S3 / Cloudflare R2 / GCS | |
+| IPFS directory pins | |
+| Netlify | |
+
+### Resolution chain
+
+The portal resolves each image slot in this order:
+
+**Icon slot** (directory cards + profile hero):
+1. `{base}/brand/icon.svg` → `{base}/brand/icon.png`
+2. `flare:brand.icon` in your JSON
+3. Top-level `logo` in your JSON
+4. TowoLabs image registry (Providers only)
+5. Address initials tile
+
+**Light / dark logo slots** (profile hero):
+1. `{base}/brand/logo-light.svg` → `.png` (or dark equivalent)
+2. `flare:brand.light` / `flare:brand.dark` in your JSON
+3. Address initials tile
+
+Explicit `flare:brand` URLs in your JSON remain supported for hand-editors and third-party indexers that don't follow the convention.
+
+### CORS reminder
+
+Brand files are fetched by the browser from the registry portal, so the same CORS rule applies: your host must send `Access-Control-Allow-Origin: *`. See § CORS above.
