@@ -1,5 +1,16 @@
 [
   {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "_identityRegistry",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
     "type": "receive",
     "stateMutability": "payable"
   },
@@ -180,6 +191,19 @@
   },
   {
     "type": "function",
+    "name": "identityRegistry",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "isRegistered",
     "inputs": [
       {
@@ -311,6 +335,11 @@
   },
   {
     "type": "error",
+    "name": "IdentityNotRegistered",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "NotActive",
     "inputs": []
   },
@@ -327,6 +356,11 @@
   {
     "type": "error",
     "name": "UriTooLong",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroRegistry",
     "inputs": []
   }
 ]

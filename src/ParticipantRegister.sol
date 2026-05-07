@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IParticipantRegister} from "./IParticipantRegister.sol";
+import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 
 /// @title ParticipantRegister
 /// @author African Proofs (https://proofs.africa)
@@ -26,6 +27,14 @@ contract ParticipantRegister is IParticipantRegister {
     address[] private _index;
     uint256 private _activeCount;
     mapping(ParticipantType => uint256) private _typeCounts;
+    address public immutable identityRegistry;
+
+    error ZeroRegistry();
+
+    constructor(address _identityRegistry) {
+        if (_identityRegistry == address(0)) revert ZeroRegistry();
+        identityRegistry = _identityRegistry;
+    }
 
     /// @dev Reject any FLR sent to this contract.
     receive() external payable {
@@ -36,6 +45,12 @@ contract ParticipantRegister is IParticipantRegister {
     function register(ParticipantType participantType, string calldata infoURI) external {
         if (bytes(infoURI).length == 0) revert EmptyInfoURI();
         if (bytes(infoURI).length > MAX_URI) revert UriTooLong();
+
+        if (participantType == ParticipantType.Provider) {
+            if (!IIdentityRegistry(identityRegistry).isRegisteredIdentity(msg.sender)) {
+                revert IdentityNotRegistered();
+            }
+        }
 
         if (_isRegistered(msg.sender)) {
             ParticipantType oldType = _participants[msg.sender].participantType;

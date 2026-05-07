@@ -4,9 +4,14 @@ pragma solidity 0.8.20;
 import "forge-std/Test.sol";
 import {ParticipantRegister} from "../src/ParticipantRegister.sol";
 import {IParticipantRegister} from "../src/IParticipantRegister.sol";
+import {MockIdentityRegistry} from "../src/test-support/MockIdentityRegistry.sol";
 
 contract ParticipantRegisterTest is Test {
     ParticipantRegister private register;
+    MockIdentityRegistry private mockRegistry;
+    address private identity1;
+    address private identity2;
+    address private identity3;
 
     event ParticipantRegistered(
         address indexed owner,
@@ -22,11 +27,12 @@ contract ParticipantRegisterTest is Test {
     address private defiProtocol = makeAddr("defiProtocol");
     address private wallet = makeAddr("wallet");
 
-    IParticipantRegister.ParticipantType constant PROVIDER = IParticipantRegister.ParticipantType.Provider;
-    IParticipantRegister.ParticipantType constant DEFI = IParticipantRegister.ParticipantType.DeFi;
-    IParticipantRegister.ParticipantType constant WALLET = IParticipantRegister.ParticipantType.Wallet;
-    IParticipantRegister.ParticipantType constant TOOL = IParticipantRegister.ParticipantType.Tool;
-    IParticipantRegister.ParticipantType constant APP = IParticipantRegister.ParticipantType.App;
+    IParticipantRegister.ParticipantType constant PROVIDER    = IParticipantRegister.ParticipantType.Provider;
+    IParticipantRegister.ParticipantType constant DEFI        = IParticipantRegister.ParticipantType.DeFi;
+    IParticipantRegister.ParticipantType constant WALLET      = IParticipantRegister.ParticipantType.Wallet;
+    IParticipantRegister.ParticipantType constant TOOL        = IParticipantRegister.ParticipantType.Tool;
+    IParticipantRegister.ParticipantType constant APP         = IParticipantRegister.ParticipantType.App;
+    IParticipantRegister.ParticipantType constant AGENTIC_AI  = IParticipantRegister.ParticipantType.AgenticAI;
 
     string private constant INFO_AP = "https://proofs.africa/participant.json";
     string private constant INFO_BOB = "https://bob.example.com/participant.json";
@@ -34,7 +40,19 @@ contract ParticipantRegisterTest is Test {
     string private constant INFO_WALLET = "https://bifrostwallet.com/participant.json";
 
     function setUp() public {
-        register = new ParticipantRegister();
+        identity1 = vm.addr(1);
+        identity2 = vm.addr(2);
+        identity3 = vm.addr(3);
+
+        mockRegistry = new MockIdentityRegistry(address(this));
+        mockRegistry.addIdentity(identity1);
+        mockRegistry.addIdentity(identity2);
+        mockRegistry.addIdentity(identity3);
+        // alice and bob register as Provider in many existing tests — add them as identities
+        mockRegistry.addIdentity(alice);
+        mockRegistry.addIdentity(bob);
+
+        register = new ParticipantRegister(address(mockRegistry));
     }
 
     function _registerAlice() internal {
@@ -153,17 +171,15 @@ contract ParticipantRegisterTest is Test {
     }
 
     function test_register_withReservedType() public {
-        IParticipantRegister.ParticipantType reserved7 = IParticipantRegister.ParticipantType.Reserved7;
-
         vm.prank(alice);
-        register.register(reserved7, INFO_AP);
+        register.register(AGENTIC_AI, INFO_AP);
 
-        assertTrue(register.getParticipant(alice).participantType == reserved7);
-        assertEq(register.typeCount(reserved7), 1);
+        assertTrue(register.getParticipant(alice).participantType == AGENTIC_AI);
+        assertEq(register.typeCount(AGENTIC_AI), 1);
 
-        address[] memory reserved = register.getParticipantsByType(reserved7);
-        assertEq(reserved.length, 1);
-        assertEq(reserved[0], alice);
+        address[] memory agents = register.getParticipantsByType(AGENTIC_AI);
+        assertEq(agents.length, 1);
+        assertEq(agents[0], alice);
     }
 
     function test_typeCount() public {
@@ -481,6 +497,7 @@ contract ParticipantRegisterTest is Test {
     function test_manyParticipants_mixedTypes() public {
         for (uint256 i = 0; i < 10; i++) {
             address user = makeAddr(string(abi.encodePacked("user", vm.toString(i))));
+            if (i < 5) mockRegistry.addIdentity(user);
             IParticipantRegister.ParticipantType t = i < 5 ? PROVIDER : DEFI;
             vm.prank(user);
             register.register(t, string(abi.encodePacked("https://example.com/", vm.toString(i), ".json")));
@@ -531,11 +548,11 @@ contract ParticipantRegisterTest is Test {
         uint256 off = uint256(offset);
         uint256 lim = bound(uint256(limit), 1, 50);
 
-        // Register n participants
+        // Register n participants (DEFI — no identity gate, type irrelevant to pagination)
         for (uint256 i = 0; i < n; i++) {
             address user = makeAddr(string(abi.encodePacked("fuzzUser", vm.toString(i))));
             vm.prank(user);
-            register.register(PROVIDER, string(abi.encodePacked("https://example.com/", vm.toString(i))));
+            register.register(DEFI, string(abi.encodePacked("https://example.com/", vm.toString(i))));
         }
 
         if (off >= n) {
@@ -584,6 +601,7 @@ contract ParticipantRegisterTest is Test {
         // Register 5, unregister 2, re-register 1
         for (uint256 i = 0; i < 5; i++) {
             address user = makeAddr(string(abi.encodePacked("inv", vm.toString(i))));
+            mockRegistry.addIdentity(user);
             vm.prank(user);
             register.register(PROVIDER, string(abi.encodePacked("https://example.com/", vm.toString(i))));
         }
@@ -627,5 +645,61 @@ contract ParticipantRegisterTest is Test {
         // Index never shrinks even after unregister
         assertEq(register.participantCount(), countBefore);
         assertEq(register.getAllParticipants().length, countBefore);
+    }
+
+    // ---------------------------------------------------------------
+    // Identity gate
+    // ---------------------------------------------------------------
+
+    function testRegisterProvider_FromIdentity_Succeeds() public {
+        vm.prank(identity1);
+        register.register(PROVIDER, INFO_AP);
+        assertTrue(register.isRegistered(identity1));
+    }
+
+    function testRegisterProvider_FromNonIdentity_Reverts() public {
+        address stranger = makeAddr("stranger");
+        vm.prank(stranger);
+        vm.expectRevert(IParticipantRegister.IdentityNotRegistered.selector);
+        register.register(PROVIDER, INFO_AP);
+    }
+
+    function testRegisterAgenticAI_AnyWallet_Succeeds() public {
+        address agent = makeAddr("agent");
+        vm.prank(agent);
+        register.register(AGENTIC_AI, INFO_AP);
+        assertTrue(register.isRegistered(agent));
+        assertTrue(register.getParticipant(agent).participantType == AGENTIC_AI);
+    }
+
+    function testRegisterAgenticAI_AppearsInTypeCounts() public {
+        address agent = makeAddr("agent");
+        vm.prank(agent);
+        register.register(AGENTIC_AI, INFO_AP);
+        assertEq(register.typeCount(AGENTIC_AI), 1);
+    }
+
+    function testRegister_NonProviderTypes_Open() public {
+        for (uint8 t = 1; t <= 7; t++) {
+            address user = makeAddr(string(abi.encodePacked("openUser", vm.toString(t))));
+            vm.prank(user);
+            register.register(IParticipantRegister.ParticipantType(t), INFO_AP);
+            assertTrue(register.isRegistered(user));
+            assertEq(register.typeCount(IParticipantRegister.ParticipantType(t)), 1);
+        }
+    }
+
+    function testConstructor_ZeroRegistryReverts() public {
+        vm.expectRevert(ParticipantRegister.ZeroRegistry.selector);
+        new ParticipantRegister(address(0));
+    }
+
+    function testProvider_RevertHasNoStateChange() public {
+        address stranger = makeAddr("stranger2");
+        vm.prank(stranger);
+        vm.expectRevert(IParticipantRegister.IdentityNotRegistered.selector);
+        register.register(PROVIDER, INFO_AP);
+        assertEq(register.participantCount(), 0);
+        assertFalse(register.isRegistered(stranger));
     }
 }

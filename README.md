@@ -40,7 +40,8 @@ A permissionless on-chain registry for Flare and Songbird ecosystem participants
 | 4 | `FAssetsAgent` | FAssets minting agents |
 | 5 | `Exchange` | CEX/DEX with Flare listings |
 | 6 | `App` | Games, NFT projects, general dApps |
-| 7-19 | `Reserved` | Future use — assign meaning via off-chain convention without redeploying |
+| 7 | `AgenticAI` | Autonomous AI agents operating in the Flare ecosystem |
+| 8-19 | `Reserved` | Future use — assign meaning via off-chain convention without redeploying |
 
 ### Events
 
@@ -167,8 +168,13 @@ forge test --gas-report
 ### Deploy
 
 ```bash
-forge script script/Deploy.s.sol --rpc-url $SONGBIRD_RPC --broadcast --private-key $PRIVATE_KEY
-forge script script/Deploy.s.sol --rpc-url $FLARE_RPC --broadcast --private-key $PRIVATE_KEY
+# Coston2 (testnet)
+IDENTITY_REGISTRY=0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e \
+  forge script script/Deploy.s.sol --rpc-url $COSTON2_RPC --broadcast --private-key $PRIVATE_KEY
+
+# Flare mainnet (after FlareIdentityAdapter deployed)
+IDENTITY_REGISTRY=<adapter-address> \
+  forge script script/Deploy.s.sol --rpc-url $FLARE_RPC --broadcast --private-key $PRIVATE_KEY
 ```
 
 ### Docker
@@ -199,13 +205,16 @@ Building a directory, wallet, or indexer on top of this registry?
 
 ## Security
 
-This contract has been **internally reviewed** by African Proofs' automated audit tooling — 48 unit + fuzz tests, zero Critical/High/Medium findings, no admin surface, no funds held, no external calls. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
+This contract has been **internally reviewed** by African Proofs' automated audit tooling — 55 unit + fuzz tests, zero Critical/High/Medium findings, no admin surface, no funds held. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
+
+Provider registrations (`participantType == 0`) revert at the contract level unless `msg.sender` is a registered identity in the configured `IIdentityRegistry`. See `CLAUDE.md` § Identity-as-signing-key for the architectural rationale.
 
 **Trust signals:**
 
-- 48 tests passing (`forge test`)
+- 55 tests passing (`forge test`)
 - No admin, no owner, no upgradeability
-- Bytecode 5,463 bytes (well under EIP-170 24KB limit)
+- Bytecode 5,742 bytes (well under EIP-170 24KB limit)
+- Constructor-pinned identity registry (immutable, no admin override)
 - Open-source, MIT-licensed
 
 **Security disclosure:** report vulnerabilities to `security@proofs.africa`. Please do not open public issues for security-sensitive findings.
