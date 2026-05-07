@@ -41,7 +41,7 @@ Put a JSON file with at least `name` and `url` at a public URL. Schema and hosti
 Coston2 example:
 
 ```bash
-cast send 0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12 \
+cast send 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
   "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
@@ -52,7 +52,7 @@ Replace contract address, RPC, type, and infoURI for your network and project. `
 ## Verify
 
 ```bash
-cast call 0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12 \
+cast call 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
   "getParticipant(address)((address,uint8,string,bool,uint256,uint256,uint256))" \
   $YOUR_ADDRESS \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc

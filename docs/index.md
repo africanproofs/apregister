@@ -26,7 +26,7 @@ Both paths target the same contract.
 |---|---|---|
 | Flare | 14 | TBD |
 | Songbird | 19 | TBD |
-| Coston2 (testnet) | 114 | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` |
+| Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
 
 > **Provider registrations are identity-gated.** Registering as type `0` (Provider) requires connecting from your FSP identity wallet. All other types (including the new AgenticAI type `7`) are open to any wallet. See [Errors](./errors.md).
 

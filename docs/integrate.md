@@ -21,7 +21,7 @@ AgenticAI) are open and can be registered from any wallet.
 
 | Network | Chain ID | Address |
 |---|---|---|
-| Coston2 (testnet) | 114 | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` |
+| Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
 | Flare | 14 | TBD |
 | Songbird | 19 | TBD |
 
@@ -50,7 +50,7 @@ const abi = parseAbi([
   "function getParticipantsByType(uint8) view returns (address[])",
 ]);
 
-const REG = "0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12";
+const REG = "0x09f15b14D16BA645661c576348E4d4C201242bF2";
 const all = await client.readContract({ address: REG, abi, functionName: "getActiveParticipants" });
 ```
 
