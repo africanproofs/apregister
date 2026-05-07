@@ -9,3 +9,4 @@ When a contract call reverts, the revert data carries one of these custom errors
 | `NotRegistered()` | You called `unregister()` from an address that has never registered | Register first, or check you're using the right wallet |
 | `NotActive()` | You called `unregister()` on a record that's already deactivated | Already inactive — no action needed |
 | `OffsetOutOfBounds()` | You called `getParticipants(offset, limit)` with `offset` past the index length | Use `participantCount()` to bound your offset |
+| `IdentityNotRegistered()` | You called `register()` with `participantType == 0` (Provider) from an address not in the configured `IIdentityRegistry` | Connect from your FSP identity wallet, not a delegation or signing wallet |

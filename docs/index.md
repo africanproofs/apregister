@@ -28,6 +28,8 @@ Both paths target the same contract.
 | Songbird | 19 | TBD |
 | Coston2 (testnet) | 114 | `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12` |
 
+> **Provider registrations are identity-gated.** Registering as type `0` (Provider) requires connecting from your FSP identity wallet. All other types (including the new AgenticAI type `7`) are open to any wallet. See [Errors](./errors.md).
+
 ## Then what
 
 Your registration is live the moment the transaction confirms. Edit your JSON file to update metadata — no second transaction needed. See [Manage your listing](./manage.md) for changes and deactivation.

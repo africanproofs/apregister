@@ -2,6 +2,21 @@
 
 Build a directory, indexer, or wallet integration on top of `ParticipantRegister`.
 
+## Provider identity gate
+
+Calling `register(participantType, infoURI)` with `participantType == 0`
+(Provider) reverts with `IdentityNotRegistered()` unless `msg.sender` is
+a registered identity on the configured registry.
+
+- **Coston2**: registry = `MockIdentityRegistry` — admin-allowlisted for AP test fixtures.
+- **Flare**: registry = `FlareIdentityAdapter`, which resolves
+  `EntityManager.getDelegationAddressOfAt(msg.sender, currentEpoch) != 0`
+  via `FlareContractRegistry`. Connect from the same wallet you use as your
+  Flare FSP **identity** — not your delegation, submit, or signing wallets.
+
+All other participant types (DeFi, Wallet, Tool, FAssetsAgent, Exchange, App,
+AgenticAI) are open and can be registered from any wallet.
+
 ## Contract
 
 | Network | Chain ID | Address |
@@ -11,6 +26,8 @@ Build a directory, indexer, or wallet integration on top of `ParticipantRegister
 | Songbird | 19 | TBD |
 
 ABI: [`abi/ParticipantRegister.abi.json`](https://github.com/africanproofs/apregister/blob/main/abi/ParticipantRegister.abi.json)
+
+Constructor: `constructor(address _identityRegistry)` — the registry address is immutable and set at deploy time.
 
 TypeScript types for `participant.json`: [`types/participant.d.ts`](https://github.com/africanproofs/apregister/blob/main/types/participant.d.ts)
 

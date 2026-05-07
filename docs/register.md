@@ -13,8 +13,11 @@ Three steps: pick a type, host your JSON, send the transaction.
 | 4 | FAssetsAgent | FAssets minting agents |
 | 5 | Exchange | CEX/DEX with Flare listings |
 | 6 | App | Games, NFT projects, dApps |
+| 7 | AgenticAI | Autonomous AI agents |
 
-The contract treats every type identically. Provider-status verification (FSP registry membership, reward eligibility) happens off-chain — registering as type `0` doesn't auto-grant rewards or special access.
+**Provider note:** `register()` with type `0` reverts with `IdentityNotRegistered()` unless the signing wallet is a registered FSP identity. Connect from your identity wallet, not your delegation or signing wallet. See [Errors](./errors.md) for details.
+
+The contract treats every type identically except Provider. Provider-status verification (FSP registry membership, reward eligibility) happens off-chain — registering as type `0` doesn't auto-grant rewards or special access.
 
 ## 2. Host your participant.json
 

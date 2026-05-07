@@ -14,7 +14,7 @@ pragma solidity 0.8.20;
 interface IParticipantRegister {
 
     /// @notice Participant type — determines how tools categorize the entity.
-    /// Types 0-6 are defined. Types 7-19 are reserved for future use —
+    /// Types 0-7 are defined. Types 8-19 are reserved for future use —
     /// assign meaning via off-chain convention without redeploying the contract.
     enum ParticipantType {
         Provider,       // 0 — FTSO, validators, FDC operators (default)
@@ -24,7 +24,7 @@ interface IParticipantRegister {
         FAssetsAgent,   // 4 — FAssets minting agents
         Exchange,       // 5 — CEX/DEX with Flare listings
         App,            // 6 — games, NFT projects, general dApps
-        Reserved7,      // 7 — future use
+        AgenticAI,      // 7 — autonomous AI agents operating in the Flare ecosystem
         Reserved8,      // 8
         Reserved9,      // 9
         Reserved10,     // 10
@@ -75,6 +75,10 @@ interface IParticipantRegister {
 
     /// @notice The offset exceeds the participant count.
     error OffsetOutOfBounds();
+
+    /// @notice The caller is not a registered identity for the configured registry.
+    /// Reverts only when registering as Provider (`participantType == 0`).
+    error IdentityNotRegistered();
 
     /// @notice Register or update. Links msg.sender to a type and metadata URI.
     /// @param participantType The type of entity (Provider, DeFi, Wallet, etc.).
