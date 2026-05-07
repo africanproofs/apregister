@@ -5,6 +5,14 @@
 - TypeScript types for `participant.json` at `types/participant.d.ts`
 - Integration guide at `docs/integrate.md`
 
+## 2026-05-07 — Identity gate + AgenticAI type
+- `ParticipantRegister` now reverts `IdentityNotRegistered()` when registering as `Provider` (`participantType == 0`) from a wallet not in the configured `IIdentityRegistry`. All other types remain open.
+- Constructor now takes `address _identityRegistry`, stored as immutable. Coston2 deploy passes `MockIdentityRegistry`; Flare deploy will pass a new `FlareIdentityAdapter` that wraps `FlareContractRegistry → EntityManager → FlareSystemsManager`.
+- `ParticipantType` slot 7 renamed `Reserved7` → `AgenticAI`. AI agents in the Flare ecosystem are a first-class category; not identity-gated.
+- New `IIdentityRegistry`, `IFlareContractRegistry`, `IEntityManager`, `IFlareSystemsManager` interfaces. New `FlareIdentityAdapter` contract.
+- 55 tests passing (47 unit + 4 fuzz + 4 new gate/AgenticAI). `contract-auditor` agent: 0 Critical / 0 High / 0 Medium.
+- Coston2 redeployed at `0x09f15b14D16BA645661c576348E4d4C201242bF2`. Old `0xF9fDB222...` orphaned.
+
 ## 2026-04-28 — Coston2 clean-slate redeployment
 - Redeployed `ParticipantRegister` to Coston2 at `0xF9fDB222FCa62B50a0d94C1F31650a4034b60B12`
 - Redeployed `MockIdentityRegistry` to Coston2 at `0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`
