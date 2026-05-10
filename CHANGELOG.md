@@ -5,6 +5,14 @@
 - TypeScript types for `participant.json` at `types/participant.d.ts`
 - Integration guide at `docs/integrate.md`
 
+## 2026-05-10 — FlareIdentityAdapter P0 fix (pre-mainnet)
+- **Critical fix.** `FlareIdentityAdapter.isRegisteredIdentity` previously called `EntityManager.getDelegationAddressOfAt(who, currentEpoch)` and treated a non-zero return as proof of identity. Verified live: `EntityManager.getDelegationAddressOfAt` echoes its input when no separate delegation is registered, so the gate would have admitted **any non-zero address** to register as Provider on Flare mainnet.
+- Adapter rewritten to call `VoterRegistry.getRegisteredVoters(currentRewardEpochId)` and check membership for `who`. The voter set is the canonical Flare-FSP identity oracle.
+- New interface `src/IVoterRegistry.sol`. Removed `src/IEntityManager.sol` (no longer referenced).
+- New fork test `test/FlareIdentityAdapter.fork.t.sol` — runs against live Flare RPC; verifies AP identity passes, `0xdead` / FCR address / zero all reject.
+- Gas: ~300k per Provider gate check (vs ~90k for the broken version). Acceptable — Provider registration is a one-shot per identity per JSON change.
+- 59 tests passing (55 unit/fuzz + 4 fork). Audit re-run on the rewritten adapter required before mainnet deploy.
+
 ## 2026-05-07 — Identity gate + AgenticAI type
 - `ParticipantRegister` now reverts `IdentityNotRegistered()` when registering as `Provider` (`participantType == 0`) from a wallet not in the configured `IIdentityRegistry`. All other types remain open.
 - Constructor now takes `address _identityRegistry`, stored as immutable. Coston2 deploy passes `MockIdentityRegistry`; Flare deploy will pass a new `FlareIdentityAdapter` that wraps `FlareContractRegistry → EntityManager → FlareSystemsManager`.

@@ -4,13 +4,13 @@ pragma solidity 0.8.20;
 /// @title MockIdentityRegistry
 /// @author African Proofs (https://proofs.africa)
 /// @notice Test-only registry that models "is this address a registered FSP
-///         identity?" on Coston2. Coston2's real EntityManager only lists
+///         identity?" on Coston2. Coston2's real VoterRegistry only lists
 ///         identities whose private keys we do not own, so this contract
 ///         stands in as the on-chain source of truth for the testnet leg of
 ///         apregister-web's provider-identity gate.
 ///
 ///         NOT for Flare or Songbird mainnet — those reads go through the
-///         canonical FlareContractRegistry → EntityManager path.
+///         canonical FlareContractRegistry → VoterRegistry path.
 ///
 /// @dev Admin-controlled allowlist. Separate from the audited
 ///      ParticipantRegister contract; lives under src/test-support/ to keep

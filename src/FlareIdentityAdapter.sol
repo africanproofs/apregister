@@ -3,15 +3,24 @@ pragma solidity 0.8.20;
 
 import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 import { IFlareContractRegistry } from "./IFlareContractRegistry.sol";
-import { IEntityManager } from "./IEntityManager.sol";
+import { IVoterRegistry } from "./IVoterRegistry.sol";
 import { IFlareSystemsManager } from "./IFlareSystemsManager.sol";
 
 /**
- * Flare-mainnet adapter that exposes FCR → EntityManager → FSM behind the
+ * Flare-mainnet adapter that exposes FCR -> VoterRegistry -> FSM behind the
  * IIdentityRegistry shape. ParticipantRegister sees only the interface;
  * this contract owns the chain-specific resolution.
  *
- * Fails closed: any RPC error / missing contract / zero return = false.
+ * Identity check semantics: `who` is treated as a registered FSP identity iff
+ * it appears in `VoterRegistry.getRegisteredVoters(currentRewardEpochId)`.
+ * That is the canonical "voter set" maintained by Flare's FSP.
+ *
+ * EntityManager.getDelegationAddressOfAt(addr, epoch) was the original
+ * candidate but echoes its input when no delegation is set, so a non-zero
+ * check trivially passes for any address. VoterRegistry membership is the
+ * correct oracle.
+ *
+ * Fails closed: any RPC error / missing contract / failed read = false.
  */
 contract FlareIdentityAdapter is IIdentityRegistry {
     IFlareContractRegistry public immutable fcr;
@@ -24,13 +33,17 @@ contract FlareIdentityAdapter is IIdentityRegistry {
     }
 
     function isRegisteredIdentity(address who) external view returns (bool) {
-        try fcr.getContractAddressByName("EntityManager") returns (address em) {
-            if (em == address(0)) return false;
+        if (who == address(0)) return false;
+        try fcr.getContractAddressByName("VoterRegistry") returns (address vr) {
+            if (vr == address(0)) return false;
             try fcr.getContractAddressByName("FlareSystemsManager") returns (address fsm) {
                 if (fsm == address(0)) return false;
                 try IFlareSystemsManager(fsm).getCurrentRewardEpochId() returns (uint24 epoch) {
-                    try IEntityManager(em).getDelegationAddressOfAt(who, uint256(epoch)) returns (address delegation) {
-                        return delegation != address(0);
+                    try IVoterRegistry(vr).getRegisteredVoters(uint256(epoch)) returns (address[] memory voters) {
+                        for (uint256 i = 0; i < voters.length; ++i) {
+                            if (voters[i] == who) return true;
+                        }
+                        return false;
                     } catch { return false; }
                 } catch { return false; }
             } catch { return false; }
