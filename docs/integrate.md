@@ -9,10 +9,12 @@ Calling `register(participantType, infoURI)` with `participantType == 0`
 a registered identity on the configured registry.
 
 - **Coston2**: registry = `MockIdentityRegistry` — admin-allowlisted for AP test fixtures.
-- **Flare**: registry = `FlareIdentityAdapter`, which resolves
-  `EntityManager.getDelegationAddressOfAt(msg.sender, currentEpoch) != 0`
-  via `FlareContractRegistry`. Connect from the same wallet you use as your
-  Flare FSP **identity** — not your delegation, submit, or signing wallets.
+- **Flare**: registry = `FlareIdentityAdapter`, which checks whether
+  `msg.sender` appears in `VoterRegistry.getRegisteredVoters(currentRewardEpochId)`
+  resolved via `FlareContractRegistry`. The voter set is the canonical
+  Flare-FSP identity set — the same one used to weight FTSO/FDC submissions.
+  Connect from the same wallet you use as your Flare FSP **identity** —
+  not your delegation, submit, or signing wallets.
 
 All other participant types (DeFi, Wallet, Tool, FAssetsAgent, Exchange, App,
 AgenticAI) are open and can be registered from any wallet.
@@ -86,4 +88,4 @@ CORS on the participant's `infoURI` is the most common integration failure. The 
 
 ## Test-support contracts (Coston2 only)
 
-`MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) is an admin-managed allowlist that mirrors the EntityManager's "is this an FSP identity?" semantics on testnet, where the real EntityManager isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `EntityManager` via `FlareContractRegistry`.
+`MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) is an admin-managed allowlist that mirrors VoterRegistry's "is this a registered FSP voter?" semantics on testnet, where the real Flare voter set isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `VoterRegistry` via `FlareContractRegistry`.

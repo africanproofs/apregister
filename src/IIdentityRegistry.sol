@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
  * Single-method registry interface for "is `who` a registered provider
  * identity on this chain?". MockIdentityRegistry implements this directly
  * (Coston2). On Flare, FlareIdentityAdapter wraps
- * FlareContractRegistry / EntityManager / FlareSystemsManager behind the
+ * FlareContractRegistry / VoterRegistry / FlareSystemsManager behind the
  * same shape.
  *
  * apregister depends only on this interface — no chainid branches, no
