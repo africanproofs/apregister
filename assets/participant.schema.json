@@ -92,6 +92,18 @@
         "enum": ["ftso", "fdc", "fast-updates", "validator", "fassets-agent", "lending", "dex", "staking"]
       }
     },
+    "flare:participant-type": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "Numeric ParticipantType enum value the wallet registered under, mirroring the on-chain (participantType, infoURI) tuple. MUST equal the value used in register(). Lets JSON consumers verify the document matches the on-chain registration without an additional RPC call. Enum: 0=Provider, 1=DeFi, 2=Wallet, 3=Tool, 4=FAssetsAgent, 5=Exchange, 6=App, 7=AgenticAI."
+    },
+    "flare:participant-type-label": {
+      "type": "string",
+      "maxLength": 32,
+      "enum": ["Provider", "DeFi", "Wallet", "Tool", "FAssets Agent", "Exchange", "App", "Agentic AI"],
+      "description": "Human-readable mirror of flare:participant-type for indexers and UIs that prefer string keys. MUST match the numeric value (Provider↔0, DeFi↔1, Wallet↔2, Tool↔3, FAssets Agent↔4, Exchange↔5, App↔6, Agentic AI↔7)."
+    },
     "flare:nodes": {
       "type": "array",
       "description": "Infrastructure node declarations. Declares where nodes run physically.",

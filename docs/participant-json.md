@@ -37,6 +37,8 @@ That's the only hard requirement. Every field below is optional and additive.
     "github": "https://github.com/kopano-oracle"
   },
   "flare:location": { "country": "ZA" },
+  "flare:participant-type": 0,
+  "flare:participant-type-label": "Provider",
   "flare:services": ["ftso", "fast-updates"],
   "flare:nodes": [{ "network": "flare", "role": "ftso-v2", "country": "ZA" }],
   "flare:rpc": [{ "network": "flare", "url": "https://flare-rpc.kopano.africa/ext/C/rpc" }]
@@ -44,6 +46,20 @@ That's the only hard requirement. Every field below is optional and additive.
 ```
 
 JSON Schema: [`participant.schema.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.schema.json).
+
+## Why `flare:participant-type`
+
+The contract stores `(participantType, infoURI)` per address. Without `flare:participant-type` in the JSON, a consumer reading the file alone cannot tell which on-chain type slot it belongs to — they'd need a separate `getParticipant(address)` call to cross-reference.
+
+Including the numeric type in the JSON:
+
+- Lets static-site indexers categorise without an RPC call
+- Lets schema validators catch JSONs that drift from their on-chain registration
+- Provides a self-evident "this is a Wallet entry, not a Provider entry" signal for human readers
+
+The numeric value MUST match what was used in `register()`. Edit your JSON to match if you migrate participant types via a re-register call.
+
+`flare:participant-type-label` is the string mirror — same information, friendlier for human-readable UIs and JSON viewers.
 
 ## Where to host
 

@@ -77,7 +77,7 @@ For on-chain consumers (Solidity), use `getParticipants(offset, limit)`. Off-cha
 
 ## Resolve metadata
 
-The on-chain record stores only `(participantType, infoURI)`. To get the full profile, fetch and parse the JSON at `infoURI`. Schema: [`assets/participant.schema.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.schema.json).
+The on-chain record stores only `(participantType, infoURI)`. The participant.json at that URI should include `flare:participant-type` matching the on-chain value so consumers can verify the cross-reference without an extra RPC call. To get the full profile, fetch and parse the JSON at `infoURI`. Schema: [`assets/participant.schema.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.schema.json).
 
 ```typescript
 const meta = await fetch(p.infoURI).then(r => r.json());
