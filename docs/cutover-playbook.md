@@ -31,10 +31,12 @@ Reproduce the failure deterministically. Cutover SHA on the deploy log will be w
 cd apregister
 git status -uno                                # confirm clean tree
 git log --oneline -5                           # confirm HEAD matches what you intend to deploy
-./forge.sh test                                # 55 + 4 fork tests must pass
+./forge.sh test                                # acceptance bar: ALL 55 unit + fuzz + 4 fork = 59 tests pass, 0 fails, 0 skips
 forge test --match-contract FlareIdentityAdapterForkTest --fork-url $FLARE_RPC -vvv
                                                # explicitly re-run fork tests; capture output
 ```
+
+**Strict acceptance bar** (no exceptions): all 59 tests must pass with zero failures and zero skipped. "Mostly passing" is not acceptable for an immutable-contract redeploy — the failing test may be the one that catches the bug you're cutting over to fix.
 
 If fork tests fail, that is the failure. Capture the output. Decide whether the issue is in the adapter (rewrite + retest) or in Flare's protocol contracts (file with Flare; do not redeploy until upstream fixed).
 
@@ -56,6 +58,13 @@ done > /tmp/snapshot-records.txt
 Also pull the events log via Flare's block explorer (or `cast logs`) for `ParticipantRegistered` and `ParticipantUnregistered` from the deploy block to current. This is the audit trail.
 
 ## Step 2 — Deploy the fix
+
+**Co-redeploy ordering matters.** If both adapter AND register need redeploying, sequence MUST be:
+1. Deploy new adapter first; capture its address.
+2. Pass the new adapter address as `IDENTITY_REGISTRY` to the register deploy.
+3. After register deploys, verify `register.identityRegistry()` returns the new adapter — otherwise you've pinned the new register to a stale adapter and the cycle starts again.
+
+If only one of the two needs redeploying, the other stays at its current address. Register's `identityRegistry` is constructor-immutable; the only way to point at a new adapter is to redeploy the register.
 
 If the bug was in `FlareIdentityAdapter`:
 
@@ -93,20 +102,43 @@ cast call <NEW_REGISTER> "participantCount()(uint256)" --rpc-url $FLARE_RPC
    ```bash
    netlify env:set NEXT_PUBLIC_REGISTER_FLARE <NEW_REGISTER> --context production --site bdb19272-2d5a-49d3-9bfa-b2310f00d003
    ```
-2. Trigger redeploy from `apregister-web/`:
+2. **Env scope hygiene.** If this is a first-ever Flare cutover, also scope `NEXT_PUBLIC_REGISTER_COSTON2` to deploy-preview + branch-deploy only (so production no longer carries a Coston2 reference). For subsequent redeploys, this is already in place.
+3. Trigger redeploy from `apregister-web/`:
    ```bash
    cd apregister-web
-   npm run deploy
+   npm run deploy   # auto-runs reconcile:check (pre-flight gate) before building
    ```
-3. Smoke test: open `https://register.proofs.africa/lookup`. Expect empty list (new contract). Connect AP identity wallet, navigate to `/new`, confirm Provider radio is enabled (gate works against new contract).
+   **Note:** `npm run deploy` is wired (`package.json:21`) to run `reconcile:check` first. Failing pre-flight = drift between Supabase and the OLD contract — read it carefully; the post-deploy reconcile will resolve drift against the NEW contract.
+4. **DNS / domain swap is NOT required** for redeploy. The apex domain `register.proofs.africa` is already attached. Netlify Let's Encrypt SSL is unchanged. Only the contract address env var changes.
+5. **CSP enforcement is NOT affected** by a contract redeploy. The 48-hour Report-Only observation window was completed 2026-05-07; CSP has been in enforcing mode since. A contract event does not restart the window.
+6. Smoke test: open `https://register.proofs.africa/lookup`. Expect empty list (new contract). Connect AP identity wallet, navigate to `/new`, confirm Provider radio is enabled (gate works against new contract).
 
-## Step 4 — Re-publish records
+## Step 4 — Supabase reconciliation
+
+The Supabase mirror at `public.registrations` is keyed on `(chain_id, lower(address))` — it's contract-agnostic. After the new contract goes live, run:
+
+```bash
+cd apregister-web
+npx tsx scripts/reconcile-registrations.ts --check --chain=14   # diagnostic — show drift
+npx tsx scripts/reconcile-registrations.ts --apply --chain=14   # apply — delete phantoms, INSERT missing
+```
+
+The script identifies three drift classes:
+- **Phantom**: Supabase row exists, on-chain doesn't — `--apply` DELETEs.
+- **Missing**: on-chain participant exists, no Supabase row — `--apply` INSERTs by re-fetching from new contract.
+- **Field-drift**: both exist but type/active/infoURI differ — `--apply` UPSERTs.
+
+**Post-deploy gate**: `reconcile:check` must report 0 phantoms and 0 missing AFTER `--apply` runs. If it doesn't, halt cutover and investigate — do NOT mark go-live complete with unresolved drift.
+
+## Step 5 — Re-publish records
 
 For every active participant from the snapshot, contact them (or self-register on AP's behalf for AP-controlled records) to re-register on the new contract.
 
 Self-registrations AP can do without coordination:
 - AP master identity → register as Provider with the AP `participant.json` URL.
 - AgenticAI / Wallet / Tool slots controlled by AP can be re-registered from the same wallets.
+
+**14-day window monitoring.** During the re-registration window, the nightly reconcile cron (`.github/workflows/nightly-reconcile.yml`) will report "missing" entries every 24h — these are providers who registered on the old contract but haven't yet re-registered on the new one. Use the report to drive a 3-message email cadence (Day 1, Day 7, Day 12) per memory `feedback_participant_json_is_ap_self_declaration.md`'s implicit cohort-comms protocol. After T+14d, treat unresponsive participants as opt-outs and mark the old contract decommissioned per Step 7.
 
 For third-party records, send a templated message:
 ```
@@ -128,7 +160,7 @@ prior signed authorization.
 — AP team
 ```
 
-## Step 5 — Document & comms
+## Step 6 — Document & comms
 
 1. Add a CHANGELOG entry to `apregister/CHANGELOG.md` with date, root cause, new addresses.
 2. Update `README.md` Deployments table with the new Flare address (replace the old).
@@ -141,7 +173,7 @@ prior signed authorization.
    - GitHub issue (post-mortem, public).
    - Direct email to known integrators.
 
-## Step 6 — Mark old records inactive (optional)
+## Step 7 — Mark old records inactive (optional)
 
 The old ParticipantRegister still exists on-chain forever. Anyone who calls `unregister()` from their identity wallet on the old contract can mark themselves inactive — but most people will simply not interact with it again. AP cannot bulk-unregister others' records (no admin). Indexers should switch to reading the new address.
 
