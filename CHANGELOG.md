@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-12 PM — README footnote: Routescan getabi cache anomaly
+
+After re-verifying the Coston2 `ParticipantRegister` via `forge verify-contract --watch` (returned `Pass - Verified`), the Routescan `getabi` Etherscan-compatible endpoint continued reporting `Contract source code not verified` while `getsourcecode` returned the full verified source. This is a structural cache-coherence quirk between Routescan's two source-code paths, not a verification failure.
+
+README's "Verified on Coston2 testnet" callout now carries a one-paragraph footnote naming the caveat and pointing at `getsourcecode` + the explorer UI as the authoritative checks. Headline claim unchanged.
+
+Closes the HIGH V2 finding from the independent validator pass (decoupled from the v1.2.2 commit set per the A1 operator-track action).
+
 ## 2026-05-12 PM — v1.2.2 docs sweep (independent-validator findings + Power-user-path realignment)
 
 Closes seven items surfaced by an independent CTO / audit / Solidity-expert validation pass run against the post-v1.2.1 state:
