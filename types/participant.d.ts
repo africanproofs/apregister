@@ -91,7 +91,7 @@ export interface FlareParticipantMetadata {
     services: ("ftso" | "fdc" | "fast-updates" | "validator" | "fassets-agent" | "lending" | "dex" | "staking")[];
   }[];
   /**
-   * Numeric ParticipantType enum value the wallet registered under, mirroring the on-chain (participantType, infoURI) tuple. MUST equal the value used in register(). Lets JSON consumers verify the document matches the on-chain registration without an additional RPC call. Enum: 0=Provider, 1=DeFi, 2=Wallet, 3=Tool, 4=FAssetsAgent, 5=Exchange, 6=App, 7=AgenticAI.
+   * Numeric ParticipantType enum value the wallet registered under, mirroring the on-chain (participantType, infoURI) tuple. MUST equal the value used in register(). Lets JSON consumers verify the document matches the on-chain registration without an additional RPC call. Named slots: 0=Provider, 1=DeFi, 2=Wallet, 3=Tool, 4=FAssetsAgent, 5=Exchange, 6=App, 7=AgenticAI. Slots 8-19 are reserved for future use — assignable via off-chain convention without a contract redeploy.
    */
   "flare:participant-type"?: number;
   /**

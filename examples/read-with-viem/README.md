@@ -30,7 +30,7 @@ Active participants: 1
     name:     African Proofs
 ```
 
-If the registry is empty (it is, as of 2026-05-12 — see [`../../CHANGELOG.md`](../../CHANGELOG.md)), the script prints a one-line note.
+If the registry is empty, the script prints a one-line note.
 
 ## Adapt to your own contract
 

@@ -1,3 +1,11 @@
+---
+name: Feature request
+about: Propose a new feature, doc, or integration improvement
+title: ''
+labels: enhancement
+assignees: ''
+---
+
 ## Problem
 
 <!-- What's missing? Who is affected? Why does this matter now? -->
@@ -16,7 +24,7 @@
 
 ## Compatibility
 
-<!-- Does this require coordinated changes in apregister-web? In consumer integrations? -->
+<!-- Does this require coordinated changes in downstream consumers (indexers, wallets, the reference portal)? -->
 
 ## Out of scope
 

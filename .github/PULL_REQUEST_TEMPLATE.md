@@ -1,6 +1,6 @@
 ## Summary
 
-<!-- What this MR changes, in one sentence. -->
+<!-- What this PR changes, in one sentence. -->
 
 ## Motivation
 
@@ -21,7 +21,7 @@
 - [ ] `forge test` — all tests pass locally
 - [ ] If contract source changed: `forge test --gas-report` — no surprise gas regression
 - [ ] If contract source changed: added new tests covering the change
-- [ ] If schema (`assets/participant.schema.json`) changed: bumped `$id` AND updated consumer types in `types/participant.d.ts`
+- [ ] If schema (`assets/participant.schema.json`) changed: regenerated `types/participant.d.ts` and `abi/*.json` via `bash scripts/check-drift.sh`; both committed
 
 ## Backward compatibility
 
@@ -29,11 +29,12 @@
 
 ## Checklist
 
-- [ ] Read and followed CONTRIBUTING.md
+- [ ] Read and followed `CONTRIBUTING.md`
 - [ ] No `Co-Authored-By` lines in commits (per project authorship policy)
 - [ ] No secrets / private keys in changed files
 - [ ] Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
+- [ ] CI `drift` job passes (types/ + abi/ match canonical sources)
 
 ---
 
-**Security-sensitive?** Do not open this MR publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) first.
+**Security-sensitive?** Do not open this PR publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) first.

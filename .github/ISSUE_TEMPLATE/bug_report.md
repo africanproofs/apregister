@@ -1,3 +1,11 @@
+---
+name: Bug report
+about: Report something broken in the contract, deploy scripts, docs, or examples
+title: ''
+labels: bug
+assignees: ''
+---
+
 ## Summary
 
 <!-- One-sentence description of the bug. -->
@@ -33,4 +41,4 @@
 
 ---
 
-**Security-sensitive?** Do not open this issue publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) instead.
+**Security-sensitive?** Do not open this issue publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) instead. See [`SECURITY.md`](../../SECURITY.md) for the full disclosure policy.
