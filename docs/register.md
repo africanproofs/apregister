@@ -38,7 +38,16 @@ Put a JSON file with at least `name` and `url` at a public URL. Schema and hosti
 
 ### Via CLI
 
-Coston2 example:
+Flare mainnet:
+
+```bash
+cast send 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
+  "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
+  --rpc-url https://flare-api.flare.network/ext/C/rpc \
+  --private-key $PRIVATE_KEY
+```
+
+Test on Coston2 testnet first (free C2FLR from the [faucet](https://faucet.flare.network/coston2)):
 
 ```bash
 cast send 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
@@ -47,15 +56,15 @@ cast send 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
   --private-key $PRIVATE_KEY
 ```
 
-Replace contract address, RPC, type, and infoURI for your network and project. `msg.sender` becomes your on-chain identity.
+`msg.sender` becomes your on-chain identity.
 
 ## Verify
 
 ```bash
-cast call 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
+cast call 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
   "getParticipant(address)((address,uint8,string,bool,uint256,uint256,uint256))" \
   $YOUR_ADDRESS \
-  --rpc-url https://coston2-api.flare.network/ext/C/rpc
+  --rpc-url https://flare-api.flare.network/ext/C/rpc
 ```
 
 Or visit `https://register.proofs.africa/<your-address>` for the rendered profile.

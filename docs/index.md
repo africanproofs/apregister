@@ -6,7 +6,7 @@ No admins, no PRs, no review process. The contract takes anyone's `(participantT
 
 ## What you'll need
 
-- A wallet with C2FLR for testnet (free from the [Coston2 faucet](https://faucet.flare.network/coston2)) — registration costs ~$0.01 on mainnet.
+- A wallet with FLR on Flare mainnet — registration costs ~$0.01. (To test first, use C2FLR on Coston2 testnet, free from the [faucet](https://faucet.flare.network/coston2).)
 - One JSON file you can host at a public URL.
 - 5 minutes.
 

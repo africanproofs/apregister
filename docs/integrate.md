@@ -23,9 +23,9 @@ AgenticAI) are open and can be registered from any wallet.
 
 | Network | Chain ID | Address |
 |---|---|---|
+| Flare | 14 | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` |
+| Songbird | 19 | n/a (out of v1 scope) |
 | Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
-| Flare | 14 | TBD |
-| Songbird | 19 | TBD |
 
 ABI: [`abi/ParticipantRegister.abi.json`](https://github.com/africanproofs/apregister/blob/main/abi/ParticipantRegister.abi.json)
 
@@ -38,21 +38,21 @@ TypeScript types for `participant.json`: [`types/participant.d.ts`](https://gith
 ```typescript
 import { createPublicClient, http, defineChain, parseAbi } from "viem";
 
-const coston2 = defineChain({
-  id: 114,
-  name: "Coston2",
-  nativeCurrency: { name: "Coston2 Flare", symbol: "C2FLR", decimals: 18 },
-  rpcUrls: { default: { http: ["https://coston2-api.flare.network/ext/C/rpc"] } },
+const flare = defineChain({
+  id: 14,
+  name: "Flare",
+  nativeCurrency: { name: "Flare", symbol: "FLR", decimals: 18 },
+  rpcUrls: { default: { http: ["https://flare-api.flare.network/ext/C/rpc"] } },
 });
 
-const client = createPublicClient({ chain: coston2, transport: http() });
+const client = createPublicClient({ chain: flare, transport: http() });
 const abi = parseAbi([
   "function getActiveParticipants() view returns (address[])",
   "function getParticipants(uint256,uint256) view returns ((address,uint8,string,bool,uint256,uint256,uint256)[])",
   "function getParticipantsByType(uint8) view returns (address[])",
 ]);
 
-const REG = "0x09f15b14D16BA645661c576348E4d4C201242bF2";
+const REG = "0xd523159981a545dA5C53Ddbba327A5E6438A171C";
 const all = await client.readContract({ address: REG, abi, functionName: "getActiveParticipants" });
 ```
 
