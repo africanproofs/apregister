@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-12 PM — Coston2 contracts verified
+
+- `ParticipantRegister` (`0x09f15b14D16BA645661c576348E4d4C201242bF2`) verified on Coston2 Routescan via the Etherscan-compatible endpoint. Constructor arg: `IDENTITY_REGISTRY = 0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`.
+- `MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) verified the same way. Constructor arg: `initialAdmin = 0xF6ca6bAEf426DfD38Aab69Fbad6CA3AfE4b6e29B` (AP master).
+- Verification settings: `solc 0.8.20`, optimizer 200 runs, EVM target `london`. Same settings as the deploy script.
+- Sourcify not used — chain 114 (Coston2) is not in Sourcify's supported-chains list. Routescan is the canonical Coston2 source-code surface.
+
+Closes the Flare/Coston2 asymmetry: integrators following the documented "test on Coston2 first" path now see verified source on both networks.
+
 ## 2026-05-12 PM — CI on GitHub Actions
 
 - New `.github/workflows/ci.yml` — five jobs (`build`, `test`, `fork-test`, `gas-report`, `drift`) replacing the GitLab CI that ran nowhere on the GitHub-canonical repo. `test` splits unit/fuzz from `fork-test` (RPC-dependent) so the green-CI signal stays honest when public RPC flakes.
