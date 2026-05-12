@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-12 PM — invariant test suite
+
+- New `test/invariant/Handler.sol` — bounded-actor handler that drives random `register`/`unregister` sequences over a 5-actor pool. 2 actors are identity-registered (Provider path reachable); 3 are not (gate-revert path covered). Four call surfaces: `registerNonProvider`, `registerProvider`, `registerProviderUnauthorized` (negative case — asserts the gate always reverts), `unregisterSelf`.
+- New `test/invariant/ParticipantRegister.invariant.t.sol` — 5 invariants:
+  - `activeCount <= participantCount` (no underflow/overflow)
+  - `getActiveParticipants().length == activeCount()` (active-array iteration matches counter)
+  - Sum of `getParticipantsByType(t)` lengths across all 20 enum slots equals `activeCount` (catches type-counter drift on re-register)
+  - `identityRegistry` immutable (no codepath mutates it)
+  - Every address in `getActiveParticipants()` reports `active = true` (no stale enumeration)
+- `foundry.toml` adds `[invariant]` profile (256 runs × 64 depth × 4 selectors = 16,384 calls per invariant).
+- Total: **64 tests** passing (55 unit/fuzz + 4 fork against live Flare + 5 invariant). README + CONTRIBUTING test count updated.
+
+Closes the CTO v3 "no invariant tests" finding. Standard trust signal for an unaudited permissionless contract.
+
 ## 2026-05-12 PM — README verification callout symmetric + cast glibc note
 
 - `README.md` adds a "Verified on Coston2 testnet" callout next to the existing Flare-mainnet one, linking both Coston2 contracts on the explorer. Notes that Sourcify does not currently support chain 114.
