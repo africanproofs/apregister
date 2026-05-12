@@ -26,3 +26,15 @@ gas-report:
   dependencies:
     - build
   allow_failure: true
+
+drift:
+  stage: test
+  dependencies:
+    - build
+  before_script:
+    # Foundry image is debian-based. The drift script needs Node (for
+    # npx json-schema-to-typescript) and Python 3 (to normalize ABI JSON).
+    - apt-get update -qq
+    - apt-get install -y --no-install-recommends nodejs npm python3 git
+  script:
+    - bash scripts/check-drift.sh

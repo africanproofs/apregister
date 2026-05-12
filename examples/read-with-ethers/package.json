@@ -1,0 +1,16 @@
+{
+  "name": "apregister-read-with-ethers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal example: read the live Flare ParticipantRegister with ethers v6",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

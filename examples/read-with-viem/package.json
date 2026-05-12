@@ -1,0 +1,16 @@
+{
+  "name": "apregister-read-with-viem",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal example: read the live Flare ParticipantRegister with viem",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

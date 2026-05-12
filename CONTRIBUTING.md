@@ -31,12 +31,31 @@ What **does** require an issue first:
 Before submitting:
 
 ```bash
-forge test -vvv             # 55 unit + fuzz tests
+forge test -vvv             # 59 tests (55 unit/fuzz + 4 fork against live Flare)
 forge test --gas-report     # surface any gas regression
 ./forge.sh test             # Docker wrapper if your host has glibc < 2.33
 ```
 
 For a change to deploy scripts, include the output of a Coston2 dry-run.
+
+### Schema extensions
+
+The participant.json schema at `assets/participant.schema.json` is intentionally extensible. Adding a new tool category, node role, service, or top-level field follows this workflow:
+
+1. Open an issue with the `proposal` label describing the use case and the proposed shape.
+2. After agreement, PR the schema change. Update `CHANGELOG.md` with the addition.
+3. Regenerate the TypeScript types and the adapter ABI if affected:
+
+   ```bash
+   bash scripts/check-drift.sh   # regenerates types/ and abi/ in place + checks for drift
+   ```
+
+4. Commit the regenerated `types/participant.d.ts` (and any `abi/*.json` changes) alongside the schema change.
+5. CI gate `drift` verifies that committed `types/` + `abi/` match what would be regenerated. Forgetting step 3-4 fails CI.
+
+Field **renames** are NOT permitted — they silently break every consumer. Field **additions** are always backward-compatible (JSON-LD consumers ignore unknown fields). Deprecations: mark the old field in `description` per the existing pattern (`flare:services`, `flare:rpc`) and keep validating it for legacy JSONs.
+
+The schema `$id` points at the canonical GitHub raw URL of the file on `main` — versioning lives in CHANGELOG + git tags, not in the URL path. See memory `feedback_schema_id_canonical_url.md` (operator-internal) for the rationale.
 
 ### What NOT to change without coordinated discussion
 
@@ -50,6 +69,8 @@ These are load-bearing decisions, each with a rationale captured in code comment
 | `participantType` enum values 0–7 | `src/IParticipantRegister.sol` | On-chain values are baked into deployed bytecode + indexed in events. New types append at index 8+; never re-order. |
 | `MAX_URI` length cap | `src/ParticipantRegister.sol` | Off-chain consumers assume the URL fits. Loosening requires schema bump. |
 | Permissionless registration for non-Provider types | `src/ParticipantRegister.sol` | Adding gates to non-Provider types breaks the "no gatekeepers" promise. |
+| `participant.json` field RENAMES (additions are fine) | `assets/participant.schema.json` | Consumers cache field names. Renaming a `flare:*` key silently breaks every existing integration. Additions are always backward-compatible per JSON-LD semantics. |
+| Schema `$id` URL must be canonical-source-resolvable | `assets/participant.schema.json` | The `$id` MUST return HTTP 200 with the schema content. JSON-Schema-aware tools follow it. Currently points at GitHub raw on `main`. |
 
 If a change requires touching one of these, open an issue first and we'll discuss whether a redeploy is justified.
 

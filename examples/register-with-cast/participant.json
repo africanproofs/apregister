@@ -1,0 +1,25 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "flare": "https://proofs.africa/ns/participant#"
+  },
+  "@type": "Organization",
+
+  "name": "Example Wallet App",
+  "description": "A sample participant.json for a Wallet-type (2) registration. Replace every field with your own values before publishing.",
+  "url": "https://example.com",
+
+  "logo": "https://example.com/logo-256.png",
+
+  "flare:participant-type": 2,
+  "flare:participant-type-label": "Wallet",
+
+  "flare:social": {
+    "twitter": "example",
+    "github": "example"
+  },
+
+  "flare:location": {
+    "country": "ZA"
+  }
+}
