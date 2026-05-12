@@ -1,6 +1,6 @@
 # apregister — Flare Participant Registry
 
-A permissionless on-chain registry for Flare and Songbird ecosystem participants. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
+A permissionless on-chain registry for the Flare ecosystem. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
 
@@ -190,9 +190,9 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 | Network | Address | Chain ID |
 |---------|---------|----------|
-| Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
-| Songbird | TBD | 19 |
 | Flare | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` | 14 |
+| Songbird | n/a (out of v1 scope) | 19 |
+| Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
 
 ## Integrate
 
@@ -212,7 +212,7 @@ Provider registrations (`participantType == 0`) revert at the contract level unl
 
 **Trust signals:**
 
-- 55 tests passing (`forge test`)
+- 59 tests passing (55 unit/fuzz + 4 fork against live Flare)
 - No admin, no owner, no upgradeability
 - Bytecode 5,742 bytes (well under EIP-170 24KB limit)
 - Constructor-pinned identity registry (immutable, no admin override)

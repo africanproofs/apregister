@@ -6,7 +6,7 @@
  */
 
 /**
- * Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract.
+ * Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract. Current canonical structure uses `flare:networks` for per-chain service breakdown; the flat `flare:services` array is retained for backward compatibility but deprecated. Infrastructure is split into two arrays: `flare:nodes` for operational hardware (where the participant physically runs nodes — implicitly internal), and `flare:tools` for public ecosystem services the participant publishes for the community (RPCs, dashboards, explorers, faucets, etc.). The legacy `flare:rpc` array is retained for backward compatibility but deprecated.
  */
 export interface FlareParticipantMetadata {
   /**
@@ -68,7 +68,7 @@ export interface FlareParticipantMetadata {
     country?: string;
   };
   /**
-   * Services the participant operates.
+   * DEPRECATED — use `flare:networks` for per-chain service breakdown. This flat list is retained for backward compatibility with pre-2026-05-09 participant.json files. New JSONs should use `flare:networks` instead.
    */
   "flare:services"?: (
     | "ftso"
@@ -81,6 +81,32 @@ export interface FlareParticipantMetadata {
     | "staking"
   )[];
   /**
+   * Networks the participant operates on, with per-network service breakdown. Current canonical structure (supersedes the flat `flare:services` array). Each entry pairs a chain id with the services the participant offers on that chain.
+   */
+  "flare:networks"?: {
+    /**
+     * Chain identifier the entry applies to.
+     */
+    id: "flare" | "songbird" | "coston2" | "coston";
+    services: ("ftso" | "fdc" | "fast-updates" | "validator" | "fassets-agent" | "lending" | "dex" | "staking")[];
+  }[];
+  /**
+   * Numeric ParticipantType enum value the wallet registered under, mirroring the on-chain (participantType, infoURI) tuple. MUST equal the value used in register(). Lets JSON consumers verify the document matches the on-chain registration without an additional RPC call. Enum: 0=Provider, 1=DeFi, 2=Wallet, 3=Tool, 4=FAssetsAgent, 5=Exchange, 6=App, 7=AgenticAI.
+   */
+  "flare:participant-type"?: number;
+  /**
+   * Human-readable mirror of flare:participant-type for indexers and UIs that prefer string keys. MUST match the numeric value (Provider↔0, DeFi↔1, Wallet↔2, Tool↔3, FAssets Agent↔4, Exchange↔5, App↔6, Agentic AI↔7).
+   */
+  "flare:participant-type-label"?:
+    | "Provider"
+    | "DeFi"
+    | "Wallet"
+    | "Tool"
+    | "FAssets Agent"
+    | "Exchange"
+    | "App"
+    | "Agentic AI";
+  /**
    * Infrastructure node declarations. Declares where nodes run physically.
    */
   "flare:nodes"?: {
@@ -92,7 +118,44 @@ export interface FlareParticipantMetadata {
     country: string;
   }[];
   /**
-   * Public RPC endpoints offered by this participant.
+   * Public ecosystem services the participant publishes for the community. Always public, always has a URL. Distinct from `flare:nodes` which declares operational hardware. Use for RPCs, block explorers, dashboards, indexers, faucets, bridges, subgraphs, analytics surfaces, dev tooling, educational sites — anything an external user can browse to or call.
+   */
+  "flare:tools"?: {
+    /**
+     * Display name of the tool (e.g. "AU.CC Flare RPC", "Flare Builders").
+     */
+    name: string;
+    /**
+     * Public URL where the tool is reachable. MUST be https://.
+     */
+    url: string;
+    /**
+     * Kind of public service. `rpc` = JSON-RPC endpoint; `explorer` = block explorer; `indexer` = indexer/API over chain data; `archive` = archive-node endpoint; `dashboard` = web dashboard/observability surface; `faucet` = testnet faucet; `bridge` = cross-chain bridge UI; `subgraph` = hosted subgraph endpoint; `analytics` = analytics/metrics surface; `dev-tool` = developer tooling (SDK docs, deployer UI, etc.); `educational` = educational/docs site; `other` = catch-all.
+     */
+    category:
+      | "rpc"
+      | "explorer"
+      | "indexer"
+      | "archive"
+      | "dashboard"
+      | "faucet"
+      | "bridge"
+      | "subgraph"
+      | "analytics"
+      | "dev-tool"
+      | "educational"
+      | "other";
+    /**
+     * Chains the tool serves. Omit when the tool is chain-agnostic (e.g. an educational site).
+     */
+    networks?: ("flare" | "songbird" | "coston2" | "coston")[];
+    /**
+     * Optional one-line description of the tool.
+     */
+    description?: string;
+  }[];
+  /**
+   * DEPRECATED — use `flare:tools` with `category: "rpc"` for public RPC endpoints. This array is retained for backward compatibility with pre-2026-05-13 participant.json files. New JSONs should use `flare:tools` instead.
    */
   "flare:rpc"?: {
     network: "flare" | "songbird" | "coston2" | "coston";
