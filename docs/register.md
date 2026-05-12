@@ -34,7 +34,7 @@ Put a JSON file with at least `name` and `url` at a public URL. Schema and hosti
 
 ### Via the portal
 
-[registerc2.proofs.africa/new](https://registerc2.proofs.africa/new) — connect, fill, sign.
+[register.proofs.africa/new](https://register.proofs.africa/new) — connect, fill, sign.
 
 ### Via CLI
 
@@ -58,7 +58,7 @@ cast call 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc
 ```
 
-Or visit `https://registerc2.proofs.africa/<your-address>` for the rendered profile.
+Or visit `https://register.proofs.africa/<your-address>` for the rendered profile.
 
 ## Cost
 

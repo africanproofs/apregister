@@ -6,8 +6,8 @@
   "@type": "Organization",
 
   "name": "African Proofs",
-  "description": "Flare infrastructure provider — ML-powered oracle, full FDC verification, dual-chain operation on Flare and Songbird",
-  "url": "https://proofs.africa",
+  "description": "FTSO data provider and blockchain infrastructure lab on the Flare network. ML-powered price predictions, validator, FDC operations, FAssets research.",
+  "url": "https://www.proofs.africa",
 
   "logo": "https://proofs.africa/logo-256.png",
   "flare:brand": {
@@ -15,6 +15,9 @@
     "dark": "https://proofs.africa/logo-dark.svg",
     "icon": "https://proofs.africa/icon-512.png"
   },
+
+  "flare:participant-type": 0,
+  "flare:participant-type-label": "Provider",
 
   "flare:social": {
     "twitter": "africanproofs",
@@ -25,17 +28,13 @@
     "country": "ZA"
   },
 
-  "flare:services": ["ftso", "fdc", "fast-updates", "validator"],
-
-  "flare:nodes": [
-    { "network": "flare", "role": "validator", "country": "FR" },
-    { "network": "flare", "role": "observer", "country": "FR" },
-    { "network": "songbird", "role": "observer", "country": "FR" },
-    { "network": "flare", "role": "fdc-verifier", "country": "FR" }
+  "flare:networks": [
+    { "id": "flare",    "services": ["ftso", "fdc", "validator"] },
+    { "id": "songbird", "services": ["ftso", "fdc", "fast-updates", "validator"] }
   ],
 
-  "flare:rpc": [
-    { "network": "flare", "url": "https://rpc.au.cc/flare" },
-    { "network": "songbird", "url": "https://rpc.au.cc/songbird" }
+  "flare:nodes": [
+    { "network": "flare",    "role": "validator", "country": "ZA" },
+    { "network": "songbird", "role": "observer",  "country": "ZA" }
   ]
 }

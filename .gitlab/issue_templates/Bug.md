@@ -33,4 +33,4 @@
 
 ---
 
-**Security-sensitive?** Do not open this issue publicly. Email security@proofs.africa instead.
+**Security-sensitive?** Do not open this issue publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) instead.

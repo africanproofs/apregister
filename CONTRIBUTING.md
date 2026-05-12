@@ -4,7 +4,7 @@ Thanks for the interest. `apregister` is the on-chain participant registry contr
 
 ## Registering as a participant
 
-You don't need a merge request. The contract is permissionless — register directly via the [portal](https://register.proofs.africa/new) (Flare mainnet) / [testnet portal](https://registerc2.proofs.africa/new) (Coston2), or by calling the contract from your tool of choice. See [`docs/register.md`](docs/register.md) for the CLI path.
+You don't need a merge request. The contract is permissionless — register directly via the [portal](https://register.proofs.africa/new) or by calling the contract from your tool of choice. See [`docs/register.md`](docs/register.md) for the CLI path.
 
 ## Code contributions
 
@@ -73,7 +73,7 @@ If a change requires touching one of these, open an issue first and we'll discus
 
 ## Security
 
-Report vulnerabilities privately to **security@proofs.africa**. See [`SECURITY.md`](SECURITY.md) for the full disclosure policy.
+Report vulnerabilities privately via Telegram DM to **@khosimorafo** (https://t.me/khosimorafo). See [`SECURITY.md`](SECURITY.md) for the full disclosure policy.
 
 The contract is immutable — a confirmed vulnerability is "redeploy or live with it." We treat security reports with the corresponding seriousness.
 

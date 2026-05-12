@@ -36,4 +36,4 @@
 
 ---
 
-**Security-sensitive?** Do not open this MR publicly. Email security@proofs.africa first.
+**Security-sensitive?** Do not open this MR publicly. DM @khosimorafo on Telegram (https://t.me/khosimorafo) first.
