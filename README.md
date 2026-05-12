@@ -201,7 +201,9 @@ Building a directory, wallet, or indexer on top of this registry?
 - ABI: [`abi/ParticipantRegister.abi.json`](abi/ParticipantRegister.abi.json)
 - TypeScript types for `participant.json`: [`types/participant.d.ts`](types/participant.d.ts)
 - Integration guide: [`docs/integrate.md`](docs/integrate.md)
-- Live portal: [registerc2.proofs.africa](https://registerc2.proofs.africa)
+- Live portal (Flare mainnet): [register.proofs.africa](https://register.proofs.africa)
+- Live portal (Coston2 testnet): [registerc2.proofs.africa](https://registerc2.proofs.africa)
+- Frontend source: [github.com/africanproofs/apregister-web](https://github.com/africanproofs/apregister-web) / [gitlab.com/proofs.africa/apregister-web](https://gitlab.com/proofs.africa/apregister-web)
 
 ## Security
 
