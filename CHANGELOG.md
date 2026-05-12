@@ -1,9 +1,12 @@
 # Changelog
 
-## [Unreleased]
-- ABI artifact published at `abi/ParticipantRegister.abi.json`
-- TypeScript types for `participant.json` at `types/participant.d.ts`
-- Integration guide at `docs/integrate.md`
+## 2026-05-12 PM — `flare:tools[]` schema + Flare-mainnet docs sweep
+- `assets/participant.schema.json` — added `flare:tools[]` for public ecosystem services (RPCs, dashboards, explorers, faucets, bridges, subgraphs, analytics, dev tools, educational sites). 12-value category enum. `$id` bumped to `schema-2026-05-13.json`.
+- `flare:rpc[]` array marked DEPRECATED (still validates; new JSONs should use `flare:tools[]` with `category: "rpc"`).
+- `assets/participant.template.json` — adds two illustrative `flare:tools[]` entries; drops the legacy `flare:rpc[]` block.
+- `types/participant.d.ts` regenerated from current schema (adds `flare:tools[]`, `flare:networks[]`, `flare:participant-type`, `flare:participant-type-label`; marks `flare:rpc[]` + `flare:services` deprecated).
+- `docs/register.md`, `docs/manage.md`, `docs/index.md`, `docs/integrate.md` — CLI snippets and contract tables now lead with Flare mainnet examples; Coston2 retained as "test first" call-out.
+- 59 tests passing (unchanged — schema is data, not contract logic).
 
 ## 2026-05-12 — Flare mainnet clean-slate redeploy + audit Prior #2 fix
 - **`FlareIdentityAdapter` patched.** `isRegisteredIdentity` switched from O(n) linear scan over `IVoterRegistry.getRegisteredVoters(epoch)` to direct O(1) `IVoterRegistry.isVoterRegistered(addr, epoch)` lookup. Decouples adapter cost from Flare's `maxVoters` governance parameter. Same fail-closed semantics. Audit Prior #2 finding addressed (contract-auditor pass, 2026-05-12).
