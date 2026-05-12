@@ -41,7 +41,10 @@ That's the only hard requirement. Every field below is optional and additive.
   "flare:participant-type-label": "Provider",
   "flare:services": ["ftso", "fast-updates"],
   "flare:nodes": [{ "network": "flare", "role": "ftso-v2", "country": "ZA" }],
-  "flare:rpc": [{ "network": "flare", "url": "https://flare-rpc.kopano.africa/ext/C/rpc" }]
+  "flare:tools": [
+    { "category": "rpc", "name": "Kopano Flare RPC", "url": "https://flare-rpc.kopano.africa/ext/C/rpc", "networks": ["flare"] },
+    { "category": "dashboard", "name": "Kopano FTSO Dashboard", "url": "https://dashboard.kopano.africa" }
+  ]
 }
 ```
 
@@ -60,6 +63,50 @@ Including the numeric type in the JSON:
 The numeric value MUST match what was used in `register()`. Edit your JSON to match if you migrate participant types via a re-register call.
 
 `flare:participant-type-label` is the string mirror — same information, friendlier for human-readable UIs and JSON viewers.
+
+## `flare:tools[]` — public ecosystem services
+
+If your participant publishes public services to the Flare community — RPC endpoints, explorers, dashboards, faucets, bridges, indexers, etc. — declare them under `flare:tools[]`. This is distinct from `flare:nodes[]`, which declares operational hardware (the boxes you run nodes on, not URLs anyone can call).
+
+Each entry has a `name`, a `url`, and a `category`:
+
+```json
+{
+  "flare:tools": [
+    {
+      "category": "rpc",
+      "name": "Kopano Flare RPC",
+      "url": "https://flare-rpc.kopano.africa/ext/C/rpc",
+      "networks": ["flare"]
+    },
+    {
+      "category": "dashboard",
+      "name": "Kopano FTSO Dashboard",
+      "url": "https://dashboard.kopano.africa",
+      "description": "Live submission/reveal accuracy + reward minimal-conditions status."
+    }
+  ]
+}
+```
+
+Supported categories (12 total, schema enum):
+`rpc`, `explorer`, `indexer`, `archive`, `dashboard`, `faucet`, `bridge`, `subgraph`, `analytics`, `dev-tool`, `educational`, `other`.
+
+Per-entry fields:
+
+| Field | Required | Notes |
+|---|---|---|
+| `name` | yes | ≤ 64 chars. Display name (e.g. "Kopano Flare RPC"). |
+| `url` | yes | ≤ 256 chars. Must be `https://`. |
+| `category` | yes | One of the 12 enum values above. |
+| `networks` | no | Array of `"flare"` / `"songbird"` / `"coston2"` / `"coston"`. Omit when the tool is chain-agnostic (e.g. an educational site). |
+| `description` | no | ≤ 200 chars. One-line tagline shown in directory hover cards. |
+
+### Migrating from `flare:rpc[]`
+
+The legacy `flare:rpc[]` array is **deprecated** but still validates. New JSONs should use `flare:tools[]` with `category: "rpc"`. Consumers should prefer `flare:tools[]` and fall back to `flare:rpc[]` only when absent.
+
+Schema: see [`participant.schema.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.schema.json).
 
 ## Where to host
 
