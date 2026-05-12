@@ -8,6 +8,45 @@ A permissionless on-chain registry for the Flare ecosystem. Any address — prov
 
 > **Power-user path:** the contract is the API. One `cast send`, one JSON file you host yourself. See [`docs/register.md`](docs/register.md).
 
+## How it works
+
+In a permissionless manner, the contract facilitates a decentralized method to:
+
+1. notify the ecosystem about chain infrastructure offerings, and
+2. allow for an exchange of meta-information among and about chain providers, developers, validators, wallets, exchanges, dApps, and AI agents.
+
+### From the participant side
+
+The contract exposes two state-altering functions: `register` and `unregister`.
+
+A call to `register(participantType, infoURI)` takes two parameters:
+
+1. `participantType` — a numeric enum slot from 0 to 19. Slots 0-7 are named (`Provider`, `DeFi`, `Wallet`, `Tool`, `FAssetsAgent`, `Exchange`, `App`, `AgenticAI`); slots 8-19 are reserved for future use without a contract redeploy.
+2. `infoURI` — an HTTPS URL (max 256 bytes) pointing to a JSON-LD file you host yourself. That file carries everything that isn't on-chain: name, logo, description, services, social handles, infrastructure declarations.
+
+The new record defaults to `active = true`. It is the signer's address (`msg.sender`) that is used as the index key for the record.
+
+A call to `unregister()` takes no parameters and sets `active` to `false`. No data is removed. A subsequent call to `register` will set `active` back to `true`.
+
+An update to the record is triggered when the sender submits another `register` call with new parameters. Same-address re-register is an upsert.
+
+The participant must sign the `register` and `unregister` transactions. Provider type (slot 0) is the only type with an on-chain identity gate: on Flare mainnet, the signing wallet must be a registered identity in Flare's `VoterRegistry`. All other types are open to any wallet.
+
+### From the data-consumer side
+
+Once registered, other stakeholders — dApp developers, indexers, wallets, registries — use the information as a reference and a starting point in sourcing data about deployed chain infrastructure. Interaction happens through several read functions:
+
+- `getAllParticipants()` returns every registered address, active or inactive.
+- `getActiveParticipants()` returns only addresses with `active = true`.
+- `getParticipantsByType(participantType)` filters the active set by type slot.
+- `getParticipant(address)` returns the full record as a struct: `(owner, participantType, infoURI, active, index, registeredAt, updatedAt)`.
+- `getParticipants(offset, limit)` paginates for on-chain consumers that cannot afford the O(n) iteration of the first three calls.
+- `participantCount()`, `activeCount()`, `typeCount(participantType)` return counts.
+
+Off-chain consumers fetch the JSON-LD at each `infoURI` for rich metadata. See [`docs/participant-json.md`](docs/participant-json.md) for the schema and hosting guidance.
+
+The contract has no admin facility. The identity registry address is pinned at deploy time and is `immutable`. No upgrade path, no privileged role, no funds held.
+
 ## Contract
 
 ### Write Functions

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-12 PM — README "How it works" narrative tour
+
+Inserts a `## How it works` section between the Power-user-path callout and the existing `## Contract` reference tables. Two-sided framing (participant side / consumer side) walking through `register` / `unregister` / the read function family, the JSON-LD pointer model, and the no-admin closer. Preserves the operator-voice 2022-vintage explanation, updates the API specifics to the current contract (type enum + infoURI + Participant struct + Provider identity gate).
+
+The existing function tables stay as formal API reference below; this section is the narrative tour.
+
 ## 2026-05-12 PM — README footnote: Routescan getabi cache anomaly
 
 After re-verifying the Coston2 `ParticipantRegister` via `forge verify-contract --watch` (returned `Pass - Verified`), the Routescan `getabi` Etherscan-compatible endpoint continued reporting `Contract source code not verified` while `getsourcecode` returned the full verified source. This is a structural cache-coherence quirk between Routescan's two source-code paths, not a verification failure.
