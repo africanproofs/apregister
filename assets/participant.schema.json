@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://proofs.africa/ns/participant/schema-2026-05-12.json",
+  "$id": "https://proofs.africa/ns/participant/schema-2026-05-13.json",
   "title": "Flare Participant Metadata",
-  "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract. Current canonical structure uses `flare:networks` for per-chain service breakdown; the flat `flare:services` array is retained for backward compatibility but deprecated.",
+  "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract. Current canonical structure uses `flare:networks` for per-chain service breakdown; the flat `flare:services` array is retained for backward compatibility but deprecated. Infrastructure is split into two arrays: `flare:nodes` for operational hardware (where the participant physically runs nodes — implicitly internal), and `flare:tools` for public ecosystem services the participant publishes for the community (RPCs, dashboards, explorers, faucets, etc.). The legacy `flare:rpc` array is retained for backward compatibility but deprecated.",
   "type": "object",
   "required": ["@context", "@type", "name", "url"],
   "properties": {
@@ -151,9 +151,62 @@
         "additionalProperties": false
       }
     },
+    "flare:tools": {
+      "type": "array",
+      "description": "Public ecosystem services the participant publishes for the community. Always public, always has a URL. Distinct from `flare:nodes` which declares operational hardware. Use for RPCs, block explorers, dashboards, indexers, faucets, bridges, subgraphs, analytics surfaces, dev tooling, educational sites — anything an external user can browse to or call.",
+      "items": {
+        "type": "object",
+        "required": ["name", "url", "category"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Display name of the tool (e.g. \"AU.CC Flare RPC\", \"Flare Builders\")."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 256,
+            "description": "Public URL where the tool is reachable. MUST be https://."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "rpc",
+              "explorer",
+              "indexer",
+              "archive",
+              "dashboard",
+              "faucet",
+              "bridge",
+              "subgraph",
+              "analytics",
+              "dev-tool",
+              "educational",
+              "other"
+            ],
+            "description": "Kind of public service. `rpc` = JSON-RPC endpoint; `explorer` = block explorer; `indexer` = indexer/API over chain data; `archive` = archive-node endpoint; `dashboard` = web dashboard/observability surface; `faucet` = testnet faucet; `bridge` = cross-chain bridge UI; `subgraph` = hosted subgraph endpoint; `analytics` = analytics/metrics surface; `dev-tool` = developer tooling (SDK docs, deployer UI, etc.); `educational` = educational/docs site; `other` = catch-all."
+          },
+          "networks": {
+            "type": "array",
+            "description": "Chains the tool serves. Omit when the tool is chain-agnostic (e.g. an educational site).",
+            "items": {
+              "type": "string",
+              "enum": ["flare", "songbird", "coston2", "coston"]
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Optional one-line description of the tool."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "flare:rpc": {
       "type": "array",
-      "description": "Public RPC endpoints offered by this participant.",
+      "description": "DEPRECATED — use `flare:tools` with `category: \"rpc\"` for public RPC endpoints. This array is retained for backward compatibility with pre-2026-05-13 participant.json files. New JSONs should use `flare:tools` instead.",
       "items": {
         "type": "object",
         "required": ["network", "url"],

@@ -36,5 +36,21 @@
   "flare:nodes": [
     { "network": "flare",    "role": "validator", "country": "ZA" },
     { "network": "songbird", "role": "observer",  "country": "ZA" }
+  ],
+
+  "flare:tools": [
+    {
+      "name": "Example Flare RPC",
+      "url": "https://rpc.example.com/flare",
+      "category": "rpc",
+      "networks": ["flare"],
+      "description": "Public HTTPS RPC endpoint"
+    },
+    {
+      "name": "Example Builder Dashboard",
+      "url": "https://example.builders",
+      "category": "dashboard",
+      "description": "Discoverability dashboard for the Flare ecosystem"
+    }
   ]
 }
