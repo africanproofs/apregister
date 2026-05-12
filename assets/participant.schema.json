@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://proofs.africa/ns/participant/schema.json",
+  "$id": "https://proofs.africa/ns/participant/schema-2026-05-12.json",
   "title": "Flare Participant Metadata",
-  "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract.",
+  "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract. Current canonical structure uses `flare:networks` for per-chain service breakdown; the flat `flare:services` array is retained for backward compatibility but deprecated.",
   "type": "object",
   "required": ["@context", "@type", "name", "url"],
   "properties": {
@@ -86,10 +86,33 @@
     },
     "flare:services": {
       "type": "array",
-      "description": "Services the participant operates.",
+      "description": "DEPRECATED — use `flare:networks` for per-chain service breakdown. This flat list is retained for backward compatibility with pre-2026-05-09 participant.json files. New JSONs should use `flare:networks` instead.",
       "items": {
         "type": "string",
         "enum": ["ftso", "fdc", "fast-updates", "validator", "fassets-agent", "lending", "dex", "staking"]
+      }
+    },
+    "flare:networks": {
+      "type": "array",
+      "description": "Networks the participant operates on, with per-network service breakdown. Current canonical structure (supersedes the flat `flare:services` array). Each entry pairs a chain id with the services the participant offers on that chain.",
+      "items": {
+        "type": "object",
+        "required": ["id", "services"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["flare", "songbird", "coston2", "coston"],
+            "description": "Chain identifier the entry applies to."
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["ftso", "fdc", "fast-updates", "validator", "fassets-agent", "lending", "dex", "staking"]
+            }
+          }
+        },
+        "additionalProperties": false
       }
     },
     "flare:participant-type": {

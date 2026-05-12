@@ -12,20 +12,20 @@ No admins, no PRs, no review process. The contract takes anyone's `(participantT
 
 ## Pick a path
 
-**[Register via the portal](https://registerc2.proofs.africa/new)** — most participants. Connect your wallet, fill the form, sign. Autofills from existing FTSO catalog data when available.
+**[Register via the portal](https://register.proofs.africa/new)** — most participants. Connect your wallet, fill the form, sign. Autofills from existing FTSO catalog data when available.
 
 **[Register via CLI](./register.md)** — power users, scripted deploys. One `cast send`.
 
 Both paths target the same contract.
 
-> **Currently on Coston2 testnet.** Flare mainnet deployment is pending. The portal at `registerc2.proofs.africa` lets you try the full flow risk-free. The `register.proofs.africa` domain will replace it at mainnet flip.
+> **Live on Flare mainnet** at `register.proofs.africa`. The contract is immutable, no admin, no funds held — see [SECURITY.md](https://github.com/africanproofs/apregister/blob/main/SECURITY.md) for the security posture.
 
 ## Networks
 
 | Network | Chain ID | Contract |
 |---|---|---|
-| Flare | 14 | TBD |
-| Songbird | 19 | TBD |
+| Flare | 14 | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` |
+| Songbird | 19 | n/a (out of v1 scope) |
 | Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
 
 > **Provider registrations are identity-gated.** Registering as type `0` (Provider) requires connecting from your FSP identity wallet. All other types (including the new AgenticAI type `7`) are open to any wallet. See [Errors](./errors.md).

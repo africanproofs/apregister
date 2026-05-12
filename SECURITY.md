@@ -2,13 +2,13 @@
 
 ## Reporting a Vulnerability
 
-If you find a vulnerability in this contract, please report it privately to **security@proofs.africa**.
+If you find a vulnerability in this contract, please report it privately via Telegram DM to **@khosimorafo** (https://t.me/khosimorafo).
 
 Do not open a public issue or merge request for security-sensitive findings.
 
 We aim to acknowledge a report within 48 hours and to provide an initial assessment within 7 days. Coordinated disclosure window is **90 days** from acknowledgement; if a fix is non-trivial we may request an extension and will discuss publicly.
 
-If you prefer encrypted email, request our GPG key fingerprint in your first message.
+For sensitive PoC code or logs, attach them in-channel; request a Telegram Secret Chat (end-to-end encrypted) in your first message if needed.
 
 ## Scope
 

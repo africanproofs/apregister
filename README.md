@@ -202,7 +202,6 @@ Building a directory, wallet, or indexer on top of this registry?
 - TypeScript types for `participant.json`: [`types/participant.d.ts`](types/participant.d.ts)
 - Integration guide: [`docs/integrate.md`](docs/integrate.md)
 - Live portal (Flare mainnet): [register.proofs.africa](https://register.proofs.africa)
-- Live portal (Coston2 testnet): [registerc2.proofs.africa](https://registerc2.proofs.africa)
 - Frontend source: [github.com/africanproofs/apregister-web](https://github.com/africanproofs/apregister-web) / [gitlab.com/proofs.africa/apregister-web](https://gitlab.com/proofs.africa/apregister-web)
 
 ## Security
@@ -219,7 +218,7 @@ Provider registrations (`participantType == 0`) revert at the contract level unl
 - Constructor-pinned identity registry (immutable, no admin override)
 - Open-source, MIT-licensed
 
-**Security disclosure:** report vulnerabilities to `security@proofs.africa`. Please do not open public issues for security-sensitive findings.
+**Security disclosure:** report vulnerabilities via Telegram DM to `@khosimorafo` (https://t.me/khosimorafo). Please do not open public issues for security-sensitive findings.
 
 ## License
 
