@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-12 PM — onboarding polish (Phase 2)
+
+- New `examples/` directory with three minimal integrations:
+  - [`examples/read-with-viem/`](examples/read-with-viem) — Node ≥ 20 + viem v2, ~80 lines.
+  - [`examples/read-with-ethers/`](examples/read-with-ethers) — Node ≥ 20 + ethers v6, same shape.
+  - [`examples/register-with-cast/`](examples/register-with-cast) — Foundry power-user path with a starter `participant.json`.
+- New `scripts/check-drift.sh` — regenerates `types/participant.d.ts` from `assets/participant.schema.json` and both ABI files from their `.sol` sources, then fails if `git diff` shows the committed files are out of sync. Auto-selects `./forge.sh` when bare `forge` doesn't run on the host's glibc.
+- New `drift` CI job in `.gitlab-ci.yml` — runs the same script on every push; blocks merges when committed types/ABIs drift from canonical sources.
+- `CONTRIBUTING.md` adds a "Schema extensions" workflow (5-step process) and two new rows to the "What NOT to change without coordinated discussion" table (schema field renames; schema `$id` URL must remain canonical-source-resolvable). Test-count line corrected from 55 to 59.
+
 ## 2026-05-12 PM — Flare mainnet contracts verified
 
 - `ParticipantRegister` (`0xd523159981a545dA5C53Ddbba327A5E6438A171C`) verified on Flarescan via Routescan's Etherscan-compatible endpoint AND on Sourcify with `exact_match` on both creation and runtime bytecode.
