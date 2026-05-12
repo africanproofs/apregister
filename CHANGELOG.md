@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-12 PM — CI on GitHub Actions
+
+- New `.github/workflows/ci.yml` — five jobs (`build`, `test`, `fork-test`, `gas-report`, `drift`) replacing the GitLab CI that ran nowhere on the GitHub-canonical repo. `test` splits unit/fuzz from `fork-test` (RPC-dependent) so the green-CI signal stays honest when public RPC flakes.
+- Deleted `.gitlab-ci.yml` — dead code; the canonical repo is GitHub.
+- README adds a CI status badge pointing at `actions/workflows/ci.yml`.
+
+Closes the CTO v3 "CI runs nowhere" finding — the Phase 2 drift gate now actually blocks merges.
+
 ## 2026-05-12 PM — onboarding polish (Phase 2)
 
 - New `examples/` directory with three minimal integrations:
