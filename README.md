@@ -1,5 +1,7 @@
 # apregister — Flare Participant Registry
 
+[![CI](https://github.com/africanproofs/apregister/actions/workflows/ci.yml/badge.svg)](https://github.com/africanproofs/apregister/actions/workflows/ci.yml)
+
 A permissionless on-chain registry for the Flare ecosystem. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
