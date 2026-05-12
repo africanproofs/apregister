@@ -192,7 +192,7 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 |---------|---------|----------|
 | Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
 | Songbird | TBD | 19 |
-| Flare | `0x8d083eAad50Bb7fE2D406AE6454bB88f8991b58a` | 14 |
+| Flare | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` | 14 |
 
 ## Integrate
 

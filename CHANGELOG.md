@@ -5,6 +5,13 @@
 - TypeScript types for `participant.json` at `types/participant.d.ts`
 - Integration guide at `docs/integrate.md`
 
+## 2026-05-12 — Flare mainnet clean-slate redeploy + audit Prior #2 fix
+- **`FlareIdentityAdapter` patched.** `isRegisteredIdentity` switched from O(n) linear scan over `IVoterRegistry.getRegisteredVoters(epoch)` to direct O(1) `IVoterRegistry.isVoterRegistered(addr, epoch)` lookup. Decouples adapter cost from Flare's `maxVoters` governance parameter. Same fail-closed semantics. Audit Prior #2 finding addressed (contract-auditor pass, 2026-05-12).
+- `IVoterRegistry.sol` — adds `isVoterRegistered(address,uint256)` interface declaration. `getRegisteredVoters` kept for backward compatibility (`script/PreDeployProbe.s.sol` still uses it).
+- Adapter runtime size: 1,385 → 1,253 bytes (loop body deleted).
+- **Flare mainnet redeployed.** New `ParticipantRegister` at `0xd523159981a545dA5C53Ddbba327A5E6438A171C`, new `FlareIdentityAdapter` at `0xF2F2BF535A14b908d599845968C150abE3987F3a`. Starts with **zero registrations** — no AP self-registration on the new contract; directory is genuinely empty. Replaces `0x8d083e…` (orphaned with 8 AP self-validation records pre-announce).
+- 59 tests passing (55 unit/fuzz + 4 fork against live Flare via patched adapter).
+
 ## 2026-05-10 — FlareIdentityAdapter P0 fix (pre-mainnet)
 - **Critical fix.** `FlareIdentityAdapter.isRegisteredIdentity` previously called `EntityManager.getDelegationAddressOfAt(who, currentEpoch)` and treated a non-zero return as proof of identity. Verified live: `EntityManager.getDelegationAddressOfAt` echoes its input when no separate delegation is registered, so the gate would have admitted **any non-zero address** to register as Provider on Flare mainnet.
 - Adapter rewritten to call `VoterRegistry.getRegisteredVoters(currentRewardEpochId)` and check membership for `who`. The voter set is the canonical Flare-FSP identity oracle.
