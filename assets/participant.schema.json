@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://proofs.africa/ns/participant/schema-2026-05-13.json",
+  "$id": "https://raw.githubusercontent.com/africanproofs/apregister/main/assets/participant.schema.json",
   "title": "Flare Participant Metadata",
   "description": "Schema for participant.json — off-chain metadata for Flare ecosystem participants registered via the ParticipantRegister contract. Current canonical structure uses `flare:networks` for per-chain service breakdown; the flat `flare:services` array is retained for backward compatibility but deprecated. Infrastructure is split into two arrays: `flare:nodes` for operational hardware (where the participant physically runs nodes — implicitly internal), and `flare:tools` for public ecosystem services the participant publishes for the community (RPCs, dashboards, explorers, faucets, etc.). The legacy `flare:rpc` array is retained for backward compatibility but deprecated.",
   "type": "object",

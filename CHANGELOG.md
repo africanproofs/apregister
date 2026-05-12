@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-12 PM — trust-anchor fixes for OSS readiness
+
+- `abi/FlareIdentityAdapter.abi.json` published (alongside the existing `ParticipantRegister.abi.json`). Integrators inspecting the identity gate now have the adapter ABI without needing to recompile from source.
+- `README.md` reframed to drop the broken `apregister-web` source links (the GitHub URL never existed and the GitLab repo is private by design). New framing: the contract is the public API; the AP frontend at `register.proofs.africa` is a closed-source reference UI, and external developers are free to build their own.
+- Schema `$id` switched from `https://proofs.africa/ns/participant/schema-2026-05-13.json` (which 404'd) to `https://raw.githubusercontent.com/africanproofs/apregister/main/assets/participant.schema.json` (HTTP 200, the canonical source). JSON-Schema `$id`-based reference resolution now works for tooling that follows the spec.
+
+Pending (Phase 1 still in flight): `forge verify-contract` for `0xd523…A171C` (ParticipantRegister) and `0xF2F2BF…87F3a` (FlareIdentityAdapter) on Flarescan/Routescan and Sourcify. Until verified, the deployed bytecode-to-source mapping rests on AP's commit history.
+
 ## 2026-05-12 PM — `flare:tools[]` schema + Flare-mainnet docs sweep
 - `assets/participant.schema.json` — added `flare:tools[]` for public ecosystem services (RPCs, dashboards, explorers, faucets, bridges, subgraphs, analytics, dev tools, educational sites). 12-value category enum. `$id` bumped to `schema-2026-05-13.json`.
 - `flare:rpc[]` array marked DEPRECATED (still validates; new JSONs should use `flare:tools[]` with `category: "rpc"`).

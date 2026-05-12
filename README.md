@@ -198,11 +198,10 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 Building a directory, wallet, or indexer on top of this registry?
 
-- ABI: [`abi/ParticipantRegister.abi.json`](abi/ParticipantRegister.abi.json)
+- ABIs: [`abi/ParticipantRegister.abi.json`](abi/ParticipantRegister.abi.json), [`abi/FlareIdentityAdapter.abi.json`](abi/FlareIdentityAdapter.abi.json)
 - TypeScript types for `participant.json`: [`types/participant.d.ts`](types/participant.d.ts)
 - Integration guide: [`docs/integrate.md`](docs/integrate.md)
-- Live portal (Flare mainnet): [register.proofs.africa](https://register.proofs.africa)
-- Frontend source: [github.com/africanproofs/apregister-web](https://github.com/africanproofs/apregister-web) / [gitlab.com/proofs.africa/apregister-web](https://gitlab.com/proofs.africa/apregister-web)
+- Reference portal (Flare mainnet): [register.proofs.africa](https://register.proofs.africa) — African Proofs' frontend, closed-source. The contract above is the public API; build your own UI freely.
 
 ## Security
 
