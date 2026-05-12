@@ -15,7 +15,7 @@ Three steps: pick a type, host your JSON, send the transaction.
 | 6 | App | Games, NFT projects, dApps |
 | 7 | AgenticAI | Autonomous AI agents |
 
-**Provider note:** `register()` with type `0` reverts with `IdentityNotRegistered()` unless the signing wallet is a registered FSP identity. Connect from your identity wallet, not your delegation or signing wallet. See [Errors](./errors.md) for details.
+**Provider note:** `register()` with type `0` reverts with `IdentityNotRegistered()` unless the signing wallet is a registered FSP identity. The CLI examples below use type `2` (Wallet) so any address can copy-paste them; if you're an FSP, jump to [§ Provider registration (FSPs only)](#provider-registration-fsps-only) below.
 
 The contract treats every type identically except Provider. Provider-status verification (FSP registry membership, reward eligibility) happens off-chain — registering as type `0` doesn't auto-grant rewards or special access.
 
@@ -38,11 +38,11 @@ Put a JSON file with at least `name` and `url` at a public URL. Schema and hosti
 
 ### Via CLI
 
-Flare mainnet:
+Flare mainnet (type `2` = Wallet; substitute your type from the table above):
 
 ```bash
 cast send 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
-  "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
+  "register(uint8,string)" 2 "https://yoursite.com/participant.json" \
   --rpc-url https://flare-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
 ```
@@ -51,12 +51,25 @@ Test on Coston2 testnet first (free C2FLR from the [faucet](https://faucet.flare
 
 ```bash
 cast send 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
-  "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
+  "register(uint8,string)" 2 "https://yoursite.com/participant.json" \
   --rpc-url https://coston2-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
 ```
 
 `msg.sender` becomes your on-chain identity.
+
+### Provider registration (FSPs only)
+
+Type `0` is identity-gated on-chain. On Flare mainnet the adapter calls `VoterRegistry.isVoterRegistered(msg.sender, currentRewardEpochId)` (O(1) direct lookup — see [`src/FlareIdentityAdapter.sol`](../src/FlareIdentityAdapter.sol)). Connect from your FSP **identity wallet**, not your delegation / submit / signing key:
+
+```bash
+cast send 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
+  "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
+  --rpc-url https://flare-api.flare.network/ext/C/rpc \
+  --private-key $PRIVATE_KEY
+```
+
+On Coston2, Provider is gated by an admin-allowlisted `MockIdentityRegistry` ([`src/test-support/MockIdentityRegistry.sol`](../src/test-support/MockIdentityRegistry.sol)) seeded with AP's HD-derived addresses only. The Coston2 faucet won't get you past the gate — test non-Provider types on Coston2, then register as Provider directly on Flare. Trying type `0` from an unallowlisted Coston2 address reverts with `IdentityNotRegistered()`.
 
 ## Verify
 

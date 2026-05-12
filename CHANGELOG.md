@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-12 PM — v1.2.2 docs sweep (independent-validator findings + Power-user-path realignment)
+
+Closes seven items surfaced by an independent CTO / audit / Solidity-expert validation pass run against the post-v1.2.1 state:
+
+- **HIGH** — `docs/register.md` quickstart defaulted to `type 0` (Provider), which is identity-gated on both networks (admin-allowlisted on Coston2, FSP-only on Flare). New users following the doc would revert with `IdentityNotRegistered()`. Quickstart now defaults to `type 2` (Wallet); separate "Provider registration (FSPs only)" subsection documents the gate and cross-links the verified adapter source.
+- **MEDIUM** — `assets/participant.schema.json` `flare:participant-type` accepts `0..19` (was `0..7`), aligning with the on-chain enum reserved slots 8-19. `types/participant.d.ts` regenerated.
+- **MEDIUM** — `examples/read-with-viem/README.md` dropped the stale "registry is empty as of 2026-05-12" note (live `activeCount()` is non-zero).
+- **MEDIUM** — `SECURITY.md` threat model adds a 5th item: stale-Provider-status. The registry doesn't re-validate `VoterRegistry` membership on reads; indexers building current-FSP assertions should call `FlareIdentityAdapter.isRegisteredIdentity` at read time, not trust the static type slot.
+- **LOW** — GitHub issue templates (Bug / Feature / Schema Extension + `config.yml` to disable blank issues) ported from `.gitlab/issue_templates/`. Added `.github/PULL_REQUEST_TEMPLATE.md` from the GitLab MR template. GitLab dir deleted.
+
+Also: README Power-user-path callout reworded from "skip the portal" to "the contract is the API" — portal-agnostic framing that works pre-portal-launch and post-portal-launch.
+
+No source, deploy script, or contract change. Test count unchanged at 64 (60 unit/fuzz/invariant + 4 fork).
+
 ## 2026-05-12 PM — v1.2.1 trust-anchor sync (CTO v4 HIGH fixes)
 
 CTO v4 assessment surfaced three stale trust-vector strings that the rapid v1.2.0 patches outpaced. All three are single-string edits — no source, ABI, or schema changes.

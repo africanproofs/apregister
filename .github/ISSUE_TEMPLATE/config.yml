@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://t.me/khosimorafo
+    about: Report security issues privately via Telegram DM. Do not open a public issue. See SECURITY.md for the full policy.
+  - name: General question
+    url: https://github.com/africanproofs/apregister/discussions
+    about: Open a GitHub Discussion for usage questions, integration help, or design conversations.

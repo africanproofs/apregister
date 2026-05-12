@@ -6,7 +6,7 @@ A permissionless on-chain registry for the Flare ecosystem. Any address — prov
 
 **No admin. No ownership. No gatekeepers. Fully permissionless.**
 
-> **Power-user path:** skip the portal and call the contract directly — one `cast send`, one JSON file you host yourself. See [`docs/register.md`](docs/register.md).
+> **Power-user path:** the contract is the API. One `cast send`, one JSON file you host yourself. See [`docs/register.md`](docs/register.md).
 
 ## Contract
 

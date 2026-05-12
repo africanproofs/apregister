@@ -45,6 +45,7 @@ The contract holds zero funds and has no admin. The realistic threats are:
 2. **Squatting on canonical addresses** — anyone can register any non-Provider type for any wallet they control. This is by design (permissionless). Consumers must not assume a registration implies authorization beyond what `msg.sender` proves.
 3. **JSON spoofing at `infoURI`** — the contract cannot validate off-chain content. Consumers verify out-of-band (DNS, GitHub, IPFS provenance).
 4. **Re-registration attack** — `register()` from the same `msg.sender` updates the existing entry. This is the intended upsert behaviour.
+5. **Stale Provider status** — Provider eligibility is checked at `register()` only; the contract does NOT re-validate `VoterRegistry` membership on reads. A Provider who later loses FSP standing (leaves `VoterRegistry`) remains listed in the registry as `type 0 = Provider` until they unregister or someone calls them out. Consumers building current-FSP assertions should call the adapter (`FlareIdentityAdapter.isRegisteredIdentity`) at read time, not trust the registry's static type slot.
 
 If you find a threat outside this list, that's a real finding — please report.
 
