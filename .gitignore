@@ -19,3 +19,5 @@ node_modules/
 # Private
 research/
 CLAUDE.md
+# Operator emergency playbook — owner-email + master-key references, not consumer doc
+docs/cutover-playbook.md
