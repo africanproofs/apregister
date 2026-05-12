@@ -90,11 +90,15 @@ The contract stores only a type and a pointer (`infoURI`). All rich metadata liv
 
 | Field | Type | Description |
 |---|---|---|
+| `flare:participant-type` | integer (0-19) | Echoes the on-chain `participantType` enum slot (e.g. `0` = Provider). Lets consumers verify JSON-vs-chain match without an extra RPC. |
+| `flare:participant-type-label` | string | Human-readable mirror of the type (e.g. `"Provider"`). |
 | `flare:social` | object | Usernames: `twitter`, `telegram`, `discord`, `github` |
 | `flare:location` | object | Organization domicile: `country` (ISO 3166-1 alpha-2) |
-| `flare:services` | string[] | What the entity runs: `ftso`, `fdc`, `fast-updates`, `validator`, `fassets-agent`, `lending`, `dex`, `staking` |
-| `flare:nodes` | object[] | Node declarations: `network` + `role` + `country`. Physical infrastructure location |
-| `flare:rpc` | object[] | Public RPC endpoints: `network` + `url` |
+| `flare:networks` | object[] | Per-chain service breakdown: `id` + `services[]`. Supersedes the deprecated flat `flare:services`. |
+| `flare:nodes` | object[] | Operational hardware declarations: `network` + `role` + `country`. Where you physically run nodes. |
+| `flare:tools` | object[] | Public ecosystem services you publish: `category` + `name` + `url` (+ optional `networks[]`, `description`). 12-category enum — see [`docs/participant-json.md`](docs/participant-json.md#flaretools--public-ecosystem-services). |
+
+Deprecated (still validates for legacy JSONs): `flare:services` (flat array — use `flare:networks` instead) and `flare:rpc[]` (use `flare:tools[]` with `category: "rpc"`).
 
 `flare:location.country` = where the organization is domiciled.  
 `flare:nodes[].country` = where each node physically runs. Different things.

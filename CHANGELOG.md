@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-12 PM — v1.2.1 trust-anchor sync (CTO v4 HIGH fixes)
+
+CTO v4 assessment surfaced three stale trust-vector strings that the rapid v1.2.0 patches outpaced. All three are single-string edits — no source, ABI, or schema changes.
+
+- **`SECURITY.md`** — removed broken `github.com/africanproofs/apregister-web` link (the frontend is closed-source by operator decision). Frontend issues now route to the same Telegram channel.
+- **`docs/integrate.md`** — Flare gate description now matches the verified adapter source. Was `VoterRegistry.getRegisteredVoters(currentRewardEpochId)` (the pre-Prior-#2 implementation); now `VoterRegistry.isVoterRegistered(msg.sender, currentRewardEpochId)` (O(1) direct lookup, post-2026-05-12 redeploy). Links to the verified adapter source for cross-check.
+- **`README.md`** — Optional Fields table moved off the deprecated `flare:services` (flat) + `flare:rpc[]` rows. Now lists `flare:tools[]`, `flare:networks[]`, `flare:participant-type` + label as the canonical fields, with the deprecated pair called out below.
+
+No code changes. No contract redeploy. No test count change (still 64). Tag: `v1.2.1`.
+
 ## 2026-05-12 PM — invariant test suite
 
 - New `test/invariant/Handler.sol` — bounded-actor handler that drives random `register`/`unregister` sequences over a 5-actor pool. 2 actors are identity-registered (Provider path reachable); 3 are not (gate-revert path covered). Four call surfaces: `registerNonProvider`, `registerProvider`, `registerProviderUnauthorized` (negative case — asserts the gate always reverts), `unregisterSelf`.

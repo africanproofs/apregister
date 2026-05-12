@@ -23,7 +23,7 @@ Out of scope:
 
 - `src/test-support/MockIdentityRegistry.sol` — testnet-only; never deployed to mainnet
 - Issues with the off-chain JSON-LD schema at `assets/participant.schema.json` (not security-critical; open a regular issue)
-- Issues with the frontend portal — those belong in [apregister-web](https://github.com/africanproofs/apregister-web)
+- Issues with the frontend portal at [register.proofs.africa](https://register.proofs.africa) — the reference UI is closed-source by design. Report frontend bugs (UX, rendering, browser compatibility) via the same Telegram channel; we'll triage them privately.
 - Reports against Flare's own core contracts (EntityManager, FlareContractRegistry, etc.) — please report to the Flare Foundation
 
 ## Audit Status

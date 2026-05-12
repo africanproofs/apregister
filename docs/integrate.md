@@ -9,12 +9,14 @@ Calling `register(participantType, infoURI)` with `participantType == 0`
 a registered identity on the configured registry.
 
 - **Coston2**: registry = `MockIdentityRegistry` — admin-allowlisted for AP test fixtures.
-- **Flare**: registry = `FlareIdentityAdapter`, which checks whether
-  `msg.sender` appears in `VoterRegistry.getRegisteredVoters(currentRewardEpochId)`
-  resolved via `FlareContractRegistry`. The voter set is the canonical
-  Flare-FSP identity set — the same one used to weight FTSO/FDC submissions.
-  Connect from the same wallet you use as your Flare FSP **identity** —
-  not your delegation, submit, or signing wallets.
+- **Flare**: registry = `FlareIdentityAdapter`, which calls
+  `VoterRegistry.isVoterRegistered(msg.sender, currentRewardEpochId)`
+  resolved via `FlareContractRegistry`. O(1) direct lookup — matches the
+  verified adapter source at [`src/FlareIdentityAdapter.sol`](https://github.com/africanproofs/apregister/blob/main/src/FlareIdentityAdapter.sol).
+  The voter set is the canonical Flare-FSP identity set — the same one
+  used to weight FTSO/FDC submissions. Connect from the same wallet you
+  use as your Flare FSP **identity** — not your delegation, submit, or
+  signing wallets.
 
 All other participant types (DeFi, Wallet, Tool, FAssetsAgent, Exchange, App,
 AgenticAI) are open and can be registered from any wallet.
