@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-12 PM — docs document `flare:tools[]`
+
+- `docs/participant-json.md` adds a new "`flare:tools[]` — public ecosystem services" section between "Why `flare:participant-type`" and "Where to host". Documents the 12-value `category` enum, the 5 per-entry fields (`name`, `url`, `category` required; `networks`, `description` optional), and the migration path from the deprecated `flare:rpc[]`.
+- The "Full" example block now uses `flare:tools[]` instead of `flare:rpc[]`. Operational `flare:nodes[]` line kept (different concept: hardware you run vs URLs you publish).
+
+Closes the gap where the Phase F schema ship (commit `99086c2`) added `flare:tools[]` but the canonical reader-facing doc still only mentioned the legacy `flare:rpc[]`.
+
 ## 2026-05-12 PM — Coston2 contracts verified
 
 - `ParticipantRegister` (`0x09f15b14D16BA645661c576348E4d4C201242bF2`) verified on Coston2 Routescan via the Etherscan-compatible endpoint. Constructor arg: `IDENTITY_REGISTRY = 0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`.
