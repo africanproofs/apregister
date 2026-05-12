@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-12 PM — Flare mainnet contracts verified
+
+- `ParticipantRegister` (`0xd523159981a545dA5C53Ddbba327A5E6438A171C`) verified on Flarescan via Routescan's Etherscan-compatible endpoint AND on Sourcify with `exact_match` on both creation and runtime bytecode.
+- `FlareIdentityAdapter` (`0xF2F2BF535A14b908d599845968C150abE3987F3a`) verified identically on both surfaces.
+- Verification settings used: `solc 0.8.20`, optimizer enabled (200 runs), EVM target `london`. Same settings as the deploy script.
+- README updated with a "Verified" callout linking to both surfaces.
+
+External integrators no longer need to trust AP's commit history — bytecode-to-source provenance is independently checkable.
+
 ## 2026-05-12 PM — trust-anchor fixes for OSS readiness
 
 - `abi/FlareIdentityAdapter.abi.json` published (alongside the existing `ParticipantRegister.abi.json`). Integrators inspecting the identity gate now have the adapter ABI without needing to recompile from source.
