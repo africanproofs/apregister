@@ -217,7 +217,7 @@ Provider registrations (`participantType == 0`) revert at the contract level unl
 
 **Trust signals:**
 
-- 59 tests passing (55 unit/fuzz + 4 fork against live Flare)
+- 64 tests passing (55 unit/fuzz + 4 fork against live Flare + 5 invariant)
 - No admin, no owner, no upgradeability
 - Bytecode 5,742 bytes (well under EIP-170 24KB limit)
 - Constructor-pinned identity registry (immutable, no admin override)

@@ -31,7 +31,7 @@ What **does** require an issue first:
 Before submitting:
 
 ```bash
-forge test -vvv             # 59 tests (55 unit/fuzz + 4 fork against live Flare)
+forge test -vvv             # 64 tests (55 unit/fuzz + 4 fork against live Flare + 5 invariant)
 forge test --gas-report     # surface any gas regression
 ./forge.sh test             # Docker wrapper if your host has glibc < 2.33
 ```
