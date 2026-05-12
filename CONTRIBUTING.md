@@ -38,6 +38,17 @@ forge test --gas-report     # surface any gas regression
 
 For a change to deploy scripts, include the output of a Coston2 dry-run.
 
+#### `cast` workaround for older glibc
+
+The Foundry `cast` CLI requires `glibc ≥ 2.33`. The `./forge.sh` Docker wrapper proxies `forge` but not `cast`. On older hosts, hand-encode address arguments as zero-padded 32-byte hex when invoking `forge verify-contract --constructor-args`:
+
+```bash
+# instead of: --constructor-args $(cast abi-encode "constructor(address)" 0xABC...)
+# use:        --constructor-args 0x000000000000000000000000abc...
+```
+
+For the `examples/register-with-cast/` walkthrough specifically, an installable Foundry on a modern host (or a remote dev box) is required — the Docker wrapper does not proxy `cast`.
+
 ### Schema extensions
 
 The participant.json schema at `assets/participant.schema.json` is intentionally extensible. Adding a new tool category, node role, service, or top-level field follows this workflow:

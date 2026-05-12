@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-05-12 PM — README verification callout symmetric + cast glibc note
+
+- `README.md` adds a "Verified on Coston2 testnet" callout next to the existing Flare-mainnet one, linking both Coston2 contracts on the explorer. Notes that Sourcify does not currently support chain 114.
+- `CONTRIBUTING.md` § Testing adds a `cast` workaround section: `cast` requires `glibc ≥ 2.33` and the `./forge.sh` wrapper does not proxy it. Operators on older hosts can hand-encode address constructor args as zero-padded 32-byte hex.
+
 ## 2026-05-12 PM — docs document `flare:tools[]`
 
 - `docs/participant-json.md` adds a new "`flare:tools[]` — public ecosystem services" section between "Why `flare:participant-type`" and "Where to host". Documents the 12-value `category` enum, the 5 per-entry fields (`name`, `url`, `category` required; `networks`, `description` optional), and the migration path from the deprecated `flare:rpc[]`.

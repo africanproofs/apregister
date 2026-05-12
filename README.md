@@ -198,6 +198,8 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 **Verified on Flare mainnet** — source matches deployed bytecode on both [Flarescan](https://flare-explorer.flare.network/address/0xd523159981a545dA5C53Ddbba327A5E6438A171C#code) and [Sourcify](https://sourcify.dev/#/lookup/0xd523159981a545dA5C53Ddbba327A5E6438A171C) (Sourcify `exact_match` on creation + runtime bytecode). The [FlareIdentityAdapter](https://flare-explorer.flare.network/address/0xF2F2BF535A14b908d599845968C150abE3987F3a#code) at `0xF2F2BF535A14b908d599845968C150abE3987F3a` is verified the same way.
 
+**Verified on Coston2 testnet** — [ParticipantRegister](https://coston2-explorer.flare.network/address/0x09f15b14D16BA645661c576348E4d4C201242bF2) and [MockIdentityRegistry](https://coston2-explorer.flare.network/address/0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e) verified on Routescan with the same compiler settings (`solc 0.8.20`, optimizer 200 runs, EVM `london`). Sourcify does not currently support chain 114 — Routescan is the canonical Coston2 source-code surface.
+
 ## Integrate
 
 Building a directory, wallet, or indexer on top of this registry?
