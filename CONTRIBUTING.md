@@ -4,7 +4,7 @@ Thanks for the interest. `apregister` is the on-chain participant registry contr
 
 ## Registering as a participant
 
-You don't need a merge request. The contract is permissionless — register directly via the [portal](https://register.proofs.africa/new) or by calling the contract from your tool of choice. See [`docs/register.md`](docs/register.md) for the CLI path.
+You don't need a pull request. The contract is permissionless — register directly via the [portal](https://register.proofs.africa/new) or by calling the contract from your tool of choice. See [`docs/register.md`](docs/register.md) for the CLI path.
 
 ## Code contributions
 
@@ -22,7 +22,7 @@ What does **not** require an issue first:
 What **does** require an issue first:
 
 - Any change to `src/*.sol` (the contract is live; this implies a redeploy)
-- Any change to `assets/participant.schema.json` (schema versioning — bump `$id`)
+- Any change to `assets/participant.schema.json` (see § Schema extensions below)
 - Any change to deploy scripts under `script/`
 - Any change to the JSON-LD `flare:` namespace conventions
 
@@ -53,7 +53,7 @@ For the `examples/register-with-cast/` walkthrough specifically, an installable 
 
 The participant.json schema at `assets/participant.schema.json` is intentionally extensible. Adding a new tool category, node role, service, or top-level field follows this workflow:
 
-1. Open an issue with the `proposal` label describing the use case and the proposed shape.
+1. Open an issue with the `schema` label describing the use case and the proposed shape (use the Schema Extension template under `.github/ISSUE_TEMPLATE/`).
 2. After agreement, PR the schema change. Update `CHANGELOG.md` with the addition.
 3. Regenerate the TypeScript types and the adapter ABI if affected:
 
@@ -88,7 +88,7 @@ If a change requires touching one of these, open an issue first and we'll discus
 ## Branching
 
 - `main` is the canonical source of truth. The deployed contracts on Coston2 and Flare are pinned to specific commits referenced in `README.md` § Deployments.
-- Feature branches: `feat/<short-name>`. Open MRs against `main`. Squash-merge once tests pass.
+- Feature branches: `feat/<short-name>`. Open PRs against `main`. Squash-merge once tests pass.
 
 ## Commit messages
 

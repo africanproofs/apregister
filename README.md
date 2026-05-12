@@ -243,8 +243,6 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 **Verified on Coston2 testnet** — [ParticipantRegister](https://coston2-explorer.flare.network/address/0x09f15b14D16BA645661c576348E4d4C201242bF2) and [MockIdentityRegistry](https://coston2-explorer.flare.network/address/0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e) verified on Routescan with the same compiler settings (`solc 0.8.20`, optimizer 200 runs, EVM `london`). Sourcify does not currently support chain 114 — Routescan is the canonical Coston2 source-code surface.
 
-> Routescan caveat: the Etherscan-compatible `getabi` endpoint reports `Contract source code not verified` for the Coston2 ParticipantRegister even after a successful re-verify (`Pass - Verified` returned by `forge verify-contract`). The `getsourcecode` endpoint and the explorer UI both return the full verified source with correct compiler settings. This is a known cache-coherence quirk between Routescan's two source-code paths. Treat `getsourcecode` (and the explorer UI) as authoritative for Coston2 verification status.
-
 ## Integrate
 
 Building a directory, wallet, or indexer on top of this registry?
@@ -256,7 +254,7 @@ Building a directory, wallet, or indexer on top of this registry?
 
 ## Security
 
-This contract has been **internally reviewed** by African Proofs' automated audit tooling — 55 unit + fuzz tests, zero Critical/High/Medium findings, no admin surface, no funds held. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
+This contract has been **internally reviewed** by African Proofs' automated audit tooling — 64 tests (55 unit/fuzz + 4 fork against live Flare + 5 invariant), zero Critical/High/Medium findings, no admin surface, no funds held. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
 
 Provider registrations (`participantType == 0`) revert at the contract level unless `msg.sender` is a registered identity in the configured `IIdentityRegistry`. See `CLAUDE.md` § Identity-as-signing-key for the architectural rationale.
 

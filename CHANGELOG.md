@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-13 — CTO v5 cleanup pass
+
+Six small items surfaced by a fifth-pass CTO review, all docs:
+
+- **`README.md`** — removed the Routescan `getabi` footnote added in `58a8e33`. The Routescan cache resolved within hours of writing the note; the footnote was teaching a transient anomaly as a permanent caveat. Lesson: don't write cache-coherence quirks into permanent docs.
+- **`README.md` Security section** — test count line said "55 unit + fuzz tests"; corrected to the canonical "64 tests (55 unit/fuzz + 4 fork against live Flare + 5 invariant)".
+- **`CONTRIBUTING.md`** + **`SECURITY.md`** — GitLab-prose vestiges replaced (merge request → pull request, MR → PR). Repo flipped to GitHub-canonical issue/PR templates in v1.2.2 but contributor-doc prose was missed.
+- **`CONTRIBUTING.md` Schema extensions** — issue label corrected from `proposal` to `schema` (the Schema Extension issue template auto-applies `schema`). Same section: dropped the contradictory "bump `$id`" parenthetical on the "issue first" list — actual policy (per § Schema extensions itself) is that `$id` stays canonical and versioning lives in CHANGELOG + git tags.
+- **`SECURITY.md` Audit Status** — test count updated to 64.
+- **`CHANGELOG.md` 2026-05-12 entry** — "directory is genuinely empty" (present tense) reworded to past tense; `participantCount()` is no longer zero.
+
+No source, deploy, or contract changes. No new tag — v1.2.2 unchanged.
+
 ## 2026-05-12 PM — README "How it works" narrative tour
 
 Inserts a `## How it works` section between the Power-user-path callout and the existing `## Contract` reference tables. Two-sided framing (participant side / consumer side) walking through `register` / `unregister` / the read function family, the JSON-LD pointer model, and the no-admin closer. Preserves the operator-voice 2022-vintage explanation, updates the API specifics to the current contract (type enum + infoURI + Participant struct + Provider identity gate).
@@ -120,7 +133,7 @@ Pending (Phase 1 still in flight): `forge verify-contract` for `0xd523…A171C` 
 - **`FlareIdentityAdapter` patched.** `isRegisteredIdentity` switched from O(n) linear scan over `IVoterRegistry.getRegisteredVoters(epoch)` to direct O(1) `IVoterRegistry.isVoterRegistered(addr, epoch)` lookup. Decouples adapter cost from Flare's `maxVoters` governance parameter. Same fail-closed semantics. Audit Prior #2 finding addressed (contract-auditor pass, 2026-05-12).
 - `IVoterRegistry.sol` — adds `isVoterRegistered(address,uint256)` interface declaration. `getRegisteredVoters` kept for backward compatibility (`script/PreDeployProbe.s.sol` still uses it).
 - Adapter runtime size: 1,385 → 1,253 bytes (loop body deleted).
-- **Flare mainnet redeployed.** New `ParticipantRegister` at `0xd523159981a545dA5C53Ddbba327A5E6438A171C`, new `FlareIdentityAdapter` at `0xF2F2BF535A14b908d599845968C150abE3987F3a`. Starts with **zero registrations** — no AP self-registration on the new contract; directory is genuinely empty. Replaces `0x8d083e…` (orphaned with 8 AP self-validation records pre-announce).
+- **Flare mainnet redeployed.** New `ParticipantRegister` at `0xd523159981a545dA5C53Ddbba327A5E6438A171C`, new `FlareIdentityAdapter` at `0xF2F2BF535A14b908d599845968C150abE3987F3a`. Started with **zero registrations** — no AP self-registration at deploy time; the directory grew from real adoption. Replaces `0x8d083e…` (orphaned with 8 AP self-validation records pre-announce).
 - 59 tests passing (55 unit/fuzz + 4 fork against live Flare via patched adapter).
 
 ## 2026-05-10 — FlareIdentityAdapter P0 fix (pre-mainnet)

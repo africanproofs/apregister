@@ -4,7 +4,7 @@
 
 If you find a vulnerability in this contract, please report it privately via Telegram DM to **@khosimorafo** (https://t.me/khosimorafo).
 
-Do not open a public issue or merge request for security-sensitive findings.
+Do not open a public issue or pull request for security-sensitive findings.
 
 We aim to acknowledge a report within 48 hours and to provide an initial assessment within 7 days. Coordinated disclosure window is **90 days** from acknowledgement; if a fix is non-trivial we may request an extension and will discuss publicly.
 
@@ -30,7 +30,7 @@ Out of scope:
 
 This contract has **not** received a third-party security audit. The current security posture is:
 
-- Internal review by AP's automated audit tooling (55 unit + fuzz tests + 4 fork tests against Flare mainnet `isRegisteredIdentity` reads)
+- Internal review by AP's automated audit tooling (64 tests: 55 unit/fuzz + 4 fork against Flare mainnet `isRegisteredIdentity` reads + 5 invariant)
 - Zero Critical / High / Medium findings from internal review
 - No admin surface, no upgrade path, no funds held by the contract
 - Constructor-pinned identity registry — immutable after deployment
