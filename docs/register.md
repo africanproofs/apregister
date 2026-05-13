@@ -21,10 +21,22 @@ The contract treats every type identically except Provider. Provider-status veri
 
 ## 2. Host your participant.json
 
-Put a JSON file with at least `name` and `url` at a public URL. Schema and hosting options: [Your participant.json](./participant-json.md).
+Put a JSON-LD file with at least `@context`, `@type`, `name`, and `url` at a public URL. Two starter files ship in the repo — pick whichever fits:
+
+- [`assets/participant.minimal.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.minimal.json) — smallest schema-valid document (the four required fields, ~200 bytes). Edit `name` and `url`, host, done.
+- [`assets/participant.template.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.template.json) — full reference with logo, brand, social handles, location, services, nodes, and tools. Use as a starting template; trim fields you don't need.
+
+Schema, hosting options, and CORS notes: [Your participant.json](./participant-json.md). The schema itself is at [`assets/participant.schema.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.schema.json) — JSON Schema Draft 2020-12; the `$id` resolves to the same canonical GitHub raw URL.
+
+Minimum valid document, mirroring `participant.minimal.json`:
 
 ```json
 {
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "flare": "https://proofs.africa/ns/participant#"
+  },
+  "@type": "Organization",
   "name": "Your Project",
   "url": "https://your-site.com"
 }

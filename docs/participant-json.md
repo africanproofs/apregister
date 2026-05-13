@@ -4,14 +4,21 @@ The contract stores only your participant type and a URL. Everything else — na
 
 ## Minimum
 
+The schema requires four fields: `@context`, `@type`, `name`, and `url`. Smallest valid document (mirrors [`assets/participant.minimal.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.minimal.json)):
+
 ```json
 {
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "flare": "https://proofs.africa/ns/participant#"
+  },
+  "@type": "Organization",
   "name": "Your Project",
   "url": "https://your-site.com"
 }
 ```
 
-That's the only hard requirement. Every field below is optional and additive.
+Every other field is optional and additive. For a full-featured starting point, see [`assets/participant.template.json`](https://github.com/africanproofs/apregister/blob/main/assets/participant.template.json).
 
 ## Full
 

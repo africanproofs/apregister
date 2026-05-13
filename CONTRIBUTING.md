@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for the interest. `apregister` is the on-chain participant registry contract for the Flare ecosystem. The contract is **live on Flare mainnet and immutable** — there is no admin, no upgrade path, no funds at risk. Changes here are documentation, tests, deployment scripts, and (rarely) a coordinated redeploy.
+Thanks for the interest. `apregister` is the on-chain participant registry contract for the Flare ecosystem. The contract is **live on Flare mainnet and immutable** — there is no admin and no funds at risk. Each participant has a self upgrade and maintenance path for their own record via `register()` upsert. Changes in this repo are documentation, tests, deployment scripts, and (rarely) a coordinated redeploy.
 
 ## Registering as a participant
 

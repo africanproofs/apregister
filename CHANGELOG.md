@@ -4,11 +4,12 @@
 
 Three real findings + three vestiges caught by a sixth-pass narrative-posture audit:
 
-- **README hero line** — replaced "No gatekeepers. Fully permissionless." (which contradicted the Provider gate, the contract's central design decision) with "Self maintenance and upgrade path. Permissionless." Each participant maintains and upgrades their own record via `register()` upsert; the contract itself remains admin-free and immutable.
+- **README hero line + three contextual occurrences** — replaced the "No gatekeepers / no upgrade path" framing (which contradicted the Provider gate and undersold the per-record upgrade flow) with the positive "Self upgrade and maintenance path" wording across README:7 (hero), README:48 (narrative-tour close), SECURITY.md:35 (audit-status bullet), and CONTRIBUTING.md:3 (intro). Each participant has a self upgrade and maintenance path for their own record via `register()` upsert; the contract itself remains admin-free and immutable.
 - **README narrative tour** — Provider-gate description was framed as Flare-mainnet-only; now correctly notes the Coston2 `MockIdentityRegistry` admin allowlist as the testnet mechanism, with a cross-link to `docs/register.md` § Provider registration.
 - **`examples/register-with-cast/README.md`** — "skip the portal" wording (v1.2.2 README sweep missed this file) replaced with the canonical "the contract is the API" framing.
 - **`CODE_OF_CONDUCT.md`** — "merge requests" replaced with "pull requests" (v5 cleanup caught CONTRIBUTING + SECURITY but missed COC).
 - **`src/test-support/MockIdentityRegistry.sol` NatSpec** + **`script/DeployMockIdentityRegistry.s.sol` comment** — references to `apregister-web` (a closed-source repo) reworded to neutral phrasing ("the off-chain provider-identity gate on the production frontend" / "an off-chain seeding script (operator-internal)"). Source-comment auditability without naming private repos.
+- **`docs/register.md` Step 2** + **`docs/participant-json.md` Minimum section** — now link the canonical `assets/participant.minimal.json` and `assets/participant.template.json` starter files (plus the schema). Also fixed a latent bug duplicated in both docs' inline "minimum" examples, which omitted the schema-required `@context` and `@type` fields and would have failed validation if copy-pasted verbatim.
 
 No source-logic, deploy script, schema, ABI, or test changes. Test count unchanged at 64.
 

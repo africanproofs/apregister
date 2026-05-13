@@ -4,7 +4,7 @@
 
 A permissionless on-chain registry for the Flare ecosystem. Any address — providers, protocols, wallets, tools, agents, exchanges, apps — registers with a type and a URL pointing to a standardized JSON-LD metadata file.
 
-**No admin. No ownership. Self maintenance and upgrade path. Permissionless.**
+**No admin. No ownership. Self upgrade and maintenance path. Permissionless.**
 
 > **Power-user path:** the contract is the API. One `cast send`, one JSON file you host yourself. See [`docs/register.md`](docs/register.md).
 
@@ -45,7 +45,7 @@ Once registered, other stakeholders — dApp developers, indexers, wallets, regi
 
 Off-chain consumers fetch the JSON-LD at each `infoURI` for rich metadata. See [`docs/participant-json.md`](docs/participant-json.md) for the schema and hosting guidance.
 
-The contract has no admin facility. The identity registry address is pinned at deploy time and is `immutable`. No upgrade path, no privileged role, no funds held.
+The contract has no admin facility. The identity registry address is pinned at deploy time and is `immutable`. Each participant has a self upgrade and maintenance path for their own record via `register()` upsert. No privileged role, no funds held.
 
 ## Contract
 

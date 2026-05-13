@@ -32,7 +32,7 @@ This contract has **not** received a third-party security audit. The current sec
 
 - Internal review by AP's automated audit tooling (64 tests: 55 unit/fuzz + 4 fork against Flare mainnet `isRegisteredIdentity` reads + 5 invariant)
 - Zero Critical / High / Medium findings from internal review
-- No admin surface, no upgrade path, no funds held by the contract
+- No admin surface, no funds held by the contract; immutable bytecode with a self upgrade and maintenance path applied per-record (via `register()` upsert)
 - Constructor-pinned identity registry — immutable after deployment
 
 A third-party audit is on the roadmap before significant ecosystem reliance on the registry. Until then: **treat this contract as a discovery layer, not a trust anchor**. Off-chain consumers should always re-validate (fetch the JSON at `infoURI`, verify identity via independent means).
