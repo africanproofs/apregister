@@ -30,7 +30,7 @@ The maintainer (African Proofs) is responsible for clarifying and enforcing our 
 
 ## Scope
 
-This Code of Conduct applies within all community spaces — issues, merge requests, discussions, and any public communication referencing this project — and also applies when an individual is officially representing the community in public spaces.
+This Code of Conduct applies within all community spaces — issues, pull requests, discussions, and any public communication referencing this project — and also applies when an individual is officially representing the community in public spaces.
 
 ## Enforcement
 

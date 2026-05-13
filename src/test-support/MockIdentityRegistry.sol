@@ -7,7 +7,7 @@ pragma solidity 0.8.20;
 ///         identity?" on Coston2. Coston2's real VoterRegistry only lists
 ///         identities whose private keys we do not own, so this contract
 ///         stands in as the on-chain source of truth for the testnet leg of
-///         apregister-web's provider-identity gate.
+///         the off-chain provider-identity gate on the production frontend.
 ///
 ///         NOT for Flare or Songbird mainnet — those reads go through the
 ///         canonical FlareContractRegistry → VoterRegistry path.

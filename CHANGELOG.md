@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-13 — CTO v6 narrative-posture cleanup
+
+Three real findings + three vestiges caught by a sixth-pass narrative-posture audit:
+
+- **README hero line** — replaced "No gatekeepers. Fully permissionless." (which contradicted the Provider gate, the contract's central design decision) with "Self maintenance and upgrade path. Permissionless." Each participant maintains and upgrades their own record via `register()` upsert; the contract itself remains admin-free and immutable.
+- **README narrative tour** — Provider-gate description was framed as Flare-mainnet-only; now correctly notes the Coston2 `MockIdentityRegistry` admin allowlist as the testnet mechanism, with a cross-link to `docs/register.md` § Provider registration.
+- **`examples/register-with-cast/README.md`** — "skip the portal" wording (v1.2.2 README sweep missed this file) replaced with the canonical "the contract is the API" framing.
+- **`CODE_OF_CONDUCT.md`** — "merge requests" replaced with "pull requests" (v5 cleanup caught CONTRIBUTING + SECURITY but missed COC).
+- **`src/test-support/MockIdentityRegistry.sol` NatSpec** + **`script/DeployMockIdentityRegistry.s.sol` comment** — references to `apregister-web` (a closed-source repo) reworded to neutral phrasing ("the off-chain provider-identity gate on the production frontend" / "an off-chain seeding script (operator-internal)"). Source-comment auditability without naming private repos.
+
+No source-logic, deploy script, schema, ABI, or test changes. Test count unchanged at 64.
+
 ## 2026-05-13 — CTO v5 cleanup pass
 
 Six small items surfaced by a fifth-pass CTO review, all docs:

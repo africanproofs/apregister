@@ -11,8 +11,8 @@ import {MockIdentityRegistry} from "../src/test-support/MockIdentityRegistry.sol
 ///     --rpc-url $COSTON2_RPC --broadcast
 ///
 /// Populate the deployed contract with the 8 mock identities separately via
-/// apregister-web/scripts/populate-mock-identity-registry.ts (uses viem + the
-/// admin key to batch-add via addIdentities).
+/// an off-chain seeding script (operator-internal, uses viem + the admin key
+/// to batch-add via addIdentities).
 contract DeployMockIdentityRegistry is Script {
     function run() external {
         uint256 pk = vm.envUint("PRIVATE_KEY");

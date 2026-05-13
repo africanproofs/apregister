@@ -1,6 +1,6 @@
 # Register with `cast`
 
-Power-user path: skip the portal, register directly from the command line with one `cast send`. Twenty seconds of work assuming you already have Foundry + a funded wallet.
+The contract is the API: register directly from the command line with one `cast send`. Twenty seconds of work assuming you already have Foundry + a funded wallet.
 
 ## Step 1 — host your `participant.json`
 
