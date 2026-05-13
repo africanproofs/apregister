@@ -168,6 +168,8 @@ The `@context` makes the file self-describing. Any JSON-LD parser — including 
 2. Call `register(ParticipantType.Provider, "https://yoursite.com/participant.json")` with your entity address
 3. Update anytime by calling `register()` again with a new type or URI
 
+Step-by-step CLI walkthrough: [`docs/register.md`](https://github.com/africanproofs/apregister/blob/main/docs/register.md).
+
 ## For Toolmakers
 
 The contract is designed for easy integration by ecosystem dashboards and wallets.
