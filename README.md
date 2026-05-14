@@ -268,6 +268,8 @@ Provider registrations (`participantType == 0`) revert at the contract level unl
 - Constructor-pinned identity registry (immutable, no admin override)
 - Open-source, MIT-licensed
 
+**Development methodology:** This repository is developed by Khosi Morafo using AI coding agents (Claude Code) under a review-then-commit workflow. All architectural decisions, contract changes, and deploys require explicit human approval. The contract's safety guarantees rest on the test suite, invariants, on-chain bytecode verification, and (forthcoming) third-party audit — not on authorship.
+
 **Security disclosure:** report vulnerabilities via Telegram DM to `@khosimorafo` (https://t.me/khosimorafo). Please do not open public issues for security-sensitive findings.
 
 ## License
