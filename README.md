@@ -238,7 +238,7 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | Network | Address | Chain ID |
 |---------|---------|----------|
 | Flare | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` | 14 |
-| Songbird | n/a (out of v1 scope) | 19 |
+| Songbird | `0x8D083eAaD50BB7fe2d406AE6454bB88f8991b58A` | 19 |
 | Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
 
 **Verified on Flare mainnet** — source matches deployed bytecode on both [Flarescan](https://flare-explorer.flare.network/address/0xd523159981a545dA5C53Ddbba327A5E6438A171C#code) and [Sourcify](https://sourcify.dev/#/lookup/0xd523159981a545dA5C53Ddbba327A5E6438A171C) (Sourcify `exact_match` on creation + runtime bytecode). The [FlareIdentityAdapter](https://flare-explorer.flare.network/address/0xF2F2BF535A14b908d599845968C150abE3987F3a#code) at `0xF2F2BF535A14b908d599845968C150abE3987F3a` is verified the same way.
