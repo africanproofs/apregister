@@ -34,11 +34,15 @@ contract FlareIdentityAdapterForkTest is Test {
     }
 
     function test_apIdentityIsRegistered() public view {
-        assertTrue(adapter.isRegisteredIdentity(AP_IDENTITY), "AP identity should be a registered voter");
+        // AP is a registered Flare FSP entity: EntityManager returns a
+        // signing-policy address distinct from the identity.
+        assertTrue(adapter.isRegisteredIdentity(AP_IDENTITY), "AP identity should be a registered entity");
     }
 
     function test_deadAddressIsNotRegistered() public view {
-        assertFalse(adapter.isRegisteredIdentity(DEAD), "0xdead should not be a registered voter");
+        // Non-entity: EntityManager echoes the queried address, so
+        // signingPolicyAddress == who -> not registered.
+        assertFalse(adapter.isRegisteredIdentity(DEAD), "0xdead should not be a registered entity");
     }
 
     function test_zeroAddressIsNotRegistered() public view {
@@ -46,7 +50,8 @@ contract FlareIdentityAdapterForkTest is Test {
     }
 
     function test_fcrAddressIsNotRegistered() public view {
-        // Sanity: the FCR contract address itself is not in the voter set.
+        // Sanity: the FCR contract address itself is not a registered entity
+        // (echo-on-miss -> distinct-from-self check fails).
         assertFalse(adapter.isRegisteredIdentity(FLARE_FCR), "FCR contract address must not pass the gate");
     }
 }
