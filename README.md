@@ -238,12 +238,14 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 | Network | Address | Chain ID |
 |---------|---------|----------|
 | Flare | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` | 14 |
-| Songbird | `0x8D083eAaD50BB7fe2d406AE6454bB88f8991b58A` | 19 |
+| Songbird | `0x7BC5d4162AE3387AcaD5C8Ce931afB04Dfb6e402` | 19 |
 | Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
 
 **Verified on Flare mainnet** — source matches deployed bytecode on both [Flarescan](https://flare-explorer.flare.network/address/0xd523159981a545dA5C53Ddbba327A5E6438A171C#code) and [Sourcify](https://sourcify.dev/#/lookup/0xd523159981a545dA5C53Ddbba327A5E6438A171C) (Sourcify `exact_match` on creation + runtime bytecode). The [FlareIdentityAdapter](https://flare-explorer.flare.network/address/0xF2F2BF535A14b908d599845968C150abE3987F3a#code) at `0xF2F2BF535A14b908d599845968C150abE3987F3a` is verified the same way.
 
 **Verified on Coston2 testnet** — [ParticipantRegister](https://coston2-explorer.flare.network/address/0x09f15b14D16BA645661c576348E4d4C201242bF2) and [MockIdentityRegistry](https://coston2-explorer.flare.network/address/0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e) verified on Routescan with the same compiler settings (`solc 0.8.20`, optimizer 200 runs, EVM `london`). Sourcify does not currently support chain 114 — Routescan is the canonical Coston2 source-code surface.
+
+**Songbird (19) is the real-everything staging canary** (apregister-web ADR-0005 / ADR-0006). The Songbird `ParticipantRegister` `0x7BC5d4162AE3387AcaD5C8Ce931afB04Dfb6e402` is constructor-pinned (immutable) to `FlareIdentityAdapter` `0x4740ABbce1EE16075fD407CA0b44974545c5B1A4` — Songbird FCR `0xaD67…6019` → real `EntityManager` `0x46C417D0…3D0049`, gating on **registered FSP identity** (distinct signing-policy address; echo-on-miss defeated). `isRegisteredIdentity` verified `true` for AP's Songbird identity `0xcf3A…d935`, `false` for the deployer / `0xdead` / zero. **No `MockIdentityRegistry` on Songbird.** Supersedes the orphaned `ParticipantRegister` `0x8D083e…b58A` / adapter `0x3f2230…68c97` (VoterRegistry-gated — `isVoterRegistered` per-epoch voter registration; wrong purpose: the gate is identity registration, not voter registration).
 
 ## Integrate
 
