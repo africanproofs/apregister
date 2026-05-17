@@ -237,11 +237,19 @@ A `forge.sh` wrapper is provided for systems where the native Foundry binary req
 
 | Network | Address | Chain ID |
 |---------|---------|----------|
-| Flare | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` | 14 |
+| Flare | `0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5` | 14 |
 | Songbird | `0x7BC5d4162AE3387AcaD5C8Ce931afB04Dfb6e402` | 19 |
 | Coston2 (testnet) | `0x09f15b14D16BA645661c576348E4d4C201242bF2` | 114 |
 
-**Verified on Flare mainnet** — source matches deployed bytecode on both [Flarescan](https://flare-explorer.flare.network/address/0xd523159981a545dA5C53Ddbba327A5E6438A171C#code) and [Sourcify](https://sourcify.dev/#/lookup/0xd523159981a545dA5C53Ddbba327A5E6438A171C) (Sourcify `exact_match` on creation + runtime bytecode). The [FlareIdentityAdapter](https://flare-explorer.flare.network/address/0xF2F2BF535A14b908d599845968C150abE3987F3a#code) at `0xF2F2BF535A14b908d599845968C150abE3987F3a` is verified the same way.
+**Flare mainnet — migrated 2026-05-17 (ADR-0006).** `ParticipantRegister`
+`0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5` pinned to corrected
+`FlareIdentityAdapter` `0x69eCa4A1F61a9b79EeB3dA47f3c7621900dB4c3b`
+(EntityManager registered-identity gate). Behaviour verified live on-chain
+(`isRegisteredIdentity` true for AP identity, false for `0xdead`/zero) and
+by a 4/4 fork test against live Flare. **Explorer/Sourcify source
+verification pending** (not yet submitted for the new pair). Supersedes
+`0xd523…171C` / adapter `0xF2F2BF…87F3a` (VoterRegistry semantics), which
+remain Flarescan/Sourcify-verified but are no longer the live contracts.
 
 **Verified on Coston2 testnet** — [ParticipantRegister](https://coston2-explorer.flare.network/address/0x09f15b14D16BA645661c576348E4d4C201242bF2) and [MockIdentityRegistry](https://coston2-explorer.flare.network/address/0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e) verified on Routescan with the same compiler settings (`solc 0.8.20`, optimizer 200 runs, EVM `london`). Sourcify does not currently support chain 114 — Routescan is the canonical Coston2 source-code surface.
 
