@@ -53,7 +53,7 @@ Minimum valid document, mirroring `participant.minimal.json`:
 Flare mainnet (type `2` = Wallet; substitute your type from the table above):
 
 ```bash
-cast send 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
+cast send 0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5 \
   "register(uint8,string)" 2 "https://yoursite.com/participant.json" \
   --rpc-url https://flare-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
@@ -72,10 +72,10 @@ cast send 0x09f15b14D16BA645661c576348E4d4C201242bF2 \
 
 ### Provider registration (FSPs only)
 
-Type `0` is identity-gated on-chain. On Flare mainnet the adapter calls `VoterRegistry.isVoterRegistered(msg.sender, currentRewardEpochId)` (O(1) direct lookup — see [`src/FlareIdentityAdapter.sol`](../src/FlareIdentityAdapter.sol)). Connect from your FSP **identity wallet**, not your delegation / submit / signing key:
+Type `0` is identity-gated on-chain. On Flare mainnet the adapter resolves Flare's `EntityManager` via `FlareContractRegistry` and treats `msg.sender` as a registered FSP identity iff its EntityManager signing-policy address is distinct from the address itself and non-zero (defeats echo-on-miss) — a one-time registered identity per `flare-systems-deployment`'s REGISTRATION.md, with **no vote-power or per-reward-epoch voter coupling** (see [`src/FlareIdentityAdapter.sol`](../src/FlareIdentityAdapter.sol)). Connect from your FSP **identity wallet**, not your delegation / submit / signing key:
 
 ```bash
-cast send 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
+cast send 0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5 \
   "register(uint8,string)" 0 "https://yoursite.com/participant.json" \
   --rpc-url https://flare-api.flare.network/ext/C/rpc \
   --private-key $PRIVATE_KEY
@@ -86,7 +86,7 @@ On Coston2, Provider is gated by an admin-allowlisted `MockIdentityRegistry` ([`
 ## Verify
 
 ```bash
-cast call 0xd523159981a545dA5C53Ddbba327A5E6438A171C \
+cast call 0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5 \
   "getParticipant(address)((address,uint8,string,bool,uint256,uint256,uint256))" \
   $YOUR_ADDRESS \
   --rpc-url https://flare-api.flare.network/ext/C/rpc

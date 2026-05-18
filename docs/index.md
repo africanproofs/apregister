@@ -24,7 +24,7 @@ Both paths target the same contract.
 
 | Network | Chain ID | Contract |
 |---|---|---|
-| Flare | 14 | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` |
+| Flare | 14 | `0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5` |
 | Songbird | 19 | n/a (out of v1 scope) |
 | Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
 

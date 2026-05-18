@@ -30,7 +30,7 @@ A call to `unregister()` takes no parameters and sets `active` to `false`. No da
 
 An update to the record is triggered when the sender submits another `register` call with new parameters. Same-address re-register is an upsert.
 
-The participant must sign the `register` and `unregister` transactions. Provider type (slot 0) is the only type with an on-chain identity gate. On Flare mainnet, the signing wallet must be a registered identity in Flare's `VoterRegistry` (resolved via `FlareIdentityAdapter`). On Coston2 testnet, Provider is gated by an admin-allowlisted `MockIdentityRegistry` seeded with AP's HD-derived addresses only. All other types are open to any wallet on either network. See [`docs/register.md`](docs/register.md) § Provider registration (FSPs only) for the gate details and CLI examples.
+The participant must sign the `register` and `unregister` transactions. Provider type (slot 0) is the only type with an on-chain identity gate. On Flare mainnet, the signing wallet must be a registered FSP identity in Flare's `EntityManager` (resolved via `FlareIdentityAdapter` through `FlareContractRegistry`; distinct-signing-policy check, echo-on-miss defeated). On Coston2 testnet, Provider is gated by an admin-allowlisted `MockIdentityRegistry` seeded with AP's HD-derived addresses only. All other types are open to any wallet on either network. See [`docs/register.md`](docs/register.md) § Provider registration (FSPs only) for the gate details and CLI examples.
 
 ### From the data-consumer side
 

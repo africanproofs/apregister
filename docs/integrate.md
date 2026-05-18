@@ -9,14 +9,15 @@ Calling `register(participantType, infoURI)` with `participantType == 0`
 a registered identity on the configured registry.
 
 - **Coston2**: registry = `MockIdentityRegistry` — admin-allowlisted for AP test fixtures.
-- **Flare**: registry = `FlareIdentityAdapter`, which calls
-  `VoterRegistry.isVoterRegistered(msg.sender, currentRewardEpochId)`
-  resolved via `FlareContractRegistry`. O(1) direct lookup — matches the
-  verified adapter source at [`src/FlareIdentityAdapter.sol`](https://github.com/africanproofs/apregister/blob/main/src/FlareIdentityAdapter.sol).
-  The voter set is the canonical Flare-FSP identity set — the same one
-  used to weight FTSO/FDC submissions. Connect from the same wallet you
-  use as your Flare FSP **identity** — not your delegation, submit, or
-  signing wallets.
+- **Flare**: registry = `FlareIdentityAdapter`, which resolves Flare's
+  `EntityManager` via `FlareContractRegistry` and treats `msg.sender` as a
+  registered FSP identity iff its EntityManager signing-policy address is
+  distinct from the address itself and non-zero (defeats echo-on-miss) —
+  matches the adapter source at [`src/FlareIdentityAdapter.sol`](https://github.com/africanproofs/apregister/blob/main/src/FlareIdentityAdapter.sol).
+  This is one-time identity registration (per `flare-systems-deployment`'s
+  REGISTRATION.md) — **no vote power, no per-reward-epoch voter coupling**.
+  Connect from the same wallet you use as your Flare FSP **identity** —
+  not your delegation, submit, or signing wallets.
 
 All other participant types (DeFi, Wallet, Tool, FAssetsAgent, Exchange, App,
 AgenticAI) are open and can be registered from any wallet.
@@ -25,7 +26,7 @@ AgenticAI) are open and can be registered from any wallet.
 
 | Network | Chain ID | Address |
 |---|---|---|
-| Flare | 14 | `0xd523159981a545dA5C53Ddbba327A5E6438A171C` |
+| Flare | 14 | `0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5` |
 | Songbird | 19 | n/a (out of v1 scope) |
 | Coston2 (testnet) | 114 | `0x09f15b14D16BA645661c576348E4d4C201242bF2` |
 
@@ -54,7 +55,7 @@ const abi = parseAbi([
   "function getParticipantsByType(uint8) view returns (address[])",
 ]);
 
-const REG = "0xd523159981a545dA5C53Ddbba327A5E6438A171C";
+const REG = "0x29BA5B29C5451e7db5885A8CFE4c73Ae1A2eABe5";
 const all = await client.readContract({ address: REG, abi, functionName: "getActiveParticipants" });
 ```
 
@@ -90,4 +91,4 @@ CORS on the participant's `infoURI` is the most common integration failure. The 
 
 ## Test-support contracts (Coston2 only)
 
-`MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) is an admin-managed allowlist that mirrors VoterRegistry's "is this a registered FSP voter?" semantics on testnet, where the real Flare voter set isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `VoterRegistry` via `FlareContractRegistry`.
+`MockIdentityRegistry` (`0xf77C24aFAC992CE17fFe2a01b642d1CE5d025D9e`) is an admin-managed allowlist that mirrors the on-chain registered-FSP-**identity** check on testnet, where Flare's real EntityManager identity set isn't populated. The portal uses it on Coston2 to gate the Provider participant type. **Do not rely on it from production code** — Flare mainnet uses the real `EntityManager` via `FlareContractRegistry`.
