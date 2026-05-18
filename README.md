@@ -274,6 +274,8 @@ Building a directory, wallet, or indexer on top of this registry?
 
 This contract has been **internally reviewed** by African Proofs' automated audit tooling — 64 tests (55 unit/fuzz + 4 fork against live Flare + 5 invariant), zero Critical/High/Medium findings, no admin surface, no funds held. **No third-party human audit has been performed yet.** A full external audit is on the roadmap before significant value flows through the registry.
 
+See [`docs/security.md`](docs/security.md) for the full security posture — the trust model, independently-verifiable contract guarantees, and what the Provider gate does and does **not** prove.
+
 Provider registrations (`participantType == 0`) revert at the contract level unless `msg.sender` is a registered identity in the configured `IIdentityRegistry`. See `CLAUDE.md` § Identity-as-signing-key for the architectural rationale.
 
 **Trust signals:**
